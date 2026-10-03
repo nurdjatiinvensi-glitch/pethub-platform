@@ -5,17 +5,12 @@ class ActivityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aktivitas'),
-      ),
-      body: const Center(
-        child: Text(
-          'Aktivitas',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-          ),
+    return const Center(
+      child: Text(
+        'Aktivitas',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import 'app_header.dart';
+import 'package:mobile/app/app_header.dart';
+import 'package:mobile/app/widgets/app_bottom_navigation.dart';
+import 'package:mobile/features/pethub_hub/presentation/pethub_hub_launcher.dart';
 
 class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AppShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const AppShell({super.key, required this.navigationShell});
 
-  void _onDestinationSelected(int index) {
+  void _onDestinationSelected(BuildContext context, int index) {
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
@@ -25,60 +23,22 @@ class AppShell extends StatelessWidget {
         children: [
           const AppHeader(),
           Expanded(
-            child: navigationShell,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: navigationShell,
+            ),
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(24),
-      topRight: Radius.circular(24),
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withValues(alpha: 0.08),
-        blurRadius: 16,
-        offset: const Offset(0, -4),
+      bottomNavigationBar: AppBottomNavigation(
+        currentIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) {
+          _onDestinationSelected(context, index);
+        },
+        onPetHubTap: () {
+          showPetHubHub(context);
+        },
       ),
-    ],
-  ),
-  child: ClipRRect(
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(24),
-      topRight: Radius.circular(24),
-    ),
-    child: NavigationBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      selectedIndex: navigationShell.currentIndex,
-      onDestinationSelected: _onDestinationSelected,
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.explore_outlined),
-          selectedIcon: Icon(Icons.explore),
-          label: 'Explore',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.receipt_long_outlined),
-          selectedIcon: Icon(Icons.receipt_long),
-          label: 'Aktivitas',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'Profil',
-        ),
-      ],
-    ),
-  ),
-),
     );
   }
 }

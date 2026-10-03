@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/app_theme.dart';
-import 'router.dart';
+import 'package:mobile/app/router.dart';
+import 'package:mobile/core/theme/app_theme.dart';
 
 class PetHubApp extends StatelessWidget {
   const PetHubApp({super.key});

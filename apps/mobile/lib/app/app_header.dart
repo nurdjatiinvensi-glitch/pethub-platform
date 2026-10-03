@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/app_theme.dart';
+import 'package:mobile/core/theme/app_theme.dart';
 
 class AppHeader extends StatelessWidget {
   const AppHeader({super.key});
@@ -10,7 +10,12 @@ class AppHeader extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+        padding: const EdgeInsets.fromLTRB(
+          10,
+          12,
+          10,
+          12,
+        ),
         child: Row(
           children: [
             RichText(

@@ -5,17 +5,12 @@ class ExplorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Explore'),
-      ),
-      body: const Center(
-        child: Text(
-          'Explore',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-          ),
+    return const Center(
+      child: Text(
+        'Explore',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

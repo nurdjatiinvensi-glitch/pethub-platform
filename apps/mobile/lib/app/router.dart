@@ -1,10 +1,10 @@
 import 'package:go_router/go_router.dart';
 
-import '../features/activity/presentation/pages/activity_page.dart';
-import '../features/explore/presentation/pages/explore_page.dart';
-import '../features/home/presentation/pages/home_page.dart';
-import '../features/profile/presentation/pages/profile_page.dart';
-import 'app_shell.dart';
+import 'package:mobile/app/app_shell.dart';
+import 'package:mobile/features/activity/presentation/pages/activity_page.dart';
+import 'package:mobile/features/explore/presentation/pages/explore_page.dart';
+import 'package:mobile/features/home/presentation/pages/home_page.dart';
+import 'package:mobile/features/profile/presentation/pages/profile_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/home',

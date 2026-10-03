@@ -1,0 +1,71 @@
+// use prisma-8
+
+model Donor {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  name      String
+  email     String?
+  accountId String?
+
+  orders    FeedCareOrder[]
+
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
+
+model FeedCarePackage {
+  id          String   @id @default(uuid())
+  name        String
+  meals       Int
+  price       Int
+  description String?
+  isActive    Boolean  @default(true)
+
+  orders      FeedCareOrder[]
+
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model FeedCareOrder {
+  id             String   @id @default(uuid())
+  orderNumber    String   @unique
+
+  donor          Donor          @relation(fields: [donorId], references: [id])
+  donorId        String
+
+  package        FeedCarePackage @relation(fields: [packageId], references: [id])
+  packageId      String
+
+  quantity       Int      @default(1)
+  mealsPurchased Int
+  totalAmount    Int
+
+  status         String   @default("PENDING")
+
+  payment        Payment?
+
+  createdAt      TimestamptzString @default(now())
+  updatedAt      temporal.updatedAtString()
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+
+  order          FeedCareOrder @relation(fields: [orderId], references: [id])
+  orderId        String   @unique
+
+  amount          Int
+  paidAmount      Int?
+  method          String
+  status          String   @default("PENDING")
+
+  proofUrl        String?
+  rejectionReason String?
+
+  paidAt          TimestamptzString?
+  verifiedAt      TimestamptzString?
+
+  createdAt       TimestamptzString @default(now())
+  updatedAt       temporal.updatedAtString()
+}
