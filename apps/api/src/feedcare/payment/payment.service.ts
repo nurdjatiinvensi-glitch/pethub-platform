@@ -53,6 +53,7 @@ export class PaymentService {
     return payment;
   }
 
+  
   async submitProof(
     orderId: string,
     paidAmount: number,
@@ -60,13 +61,19 @@ export class PaymentService {
   ) {
     const payment = await this.findByOrder(orderId);
 
-    if (payment.status === 'PAID') {
+    if (!['PENDING', 'REJECTED'].includes(payment.status)) {
       throw new BadRequestException(
-        'Payment sudah diverifikasi.',
+        'Bukti pembayaran hanya dapat dikirim saat status PENDING atau REJECTED.',
       );
     }
 
-    if (!proofUrl) {
+    if (!Number.isFinite(paidAmount) || paidAmount <= 0) {
+      throw new BadRequestException(
+        'Nominal pembayaran harus lebih dari nol.',
+      );
+    }
+
+    if (!proofUrl || !proofUrl.trim()) {
       throw new BadRequestException(
         'Bukti pembayaran wajib diupload.',
       );
@@ -78,7 +85,8 @@ export class PaymentService {
       })
       .update({
         paidAmount,
-        proofUrl,
+        proofUrl: proofUrl.trim(),
+        rejectionReason: null,
         status: 'VERIFYING',
       });
   }
