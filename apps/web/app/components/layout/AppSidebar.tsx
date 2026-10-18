@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import AppIcon from "../ui/AppIcon";
 
 const menuItems = [
@@ -12,6 +15,8 @@ const menuItems = [
 ] as const;
 
 export default function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="relative z-10 hidden h-full w-[250px] shrink-0 flex-col bg-white shadow-[4px_0_12px_rgba(15,23,42,0.06)] lg:flex">
       {/* AREA MENU: SCROLL TETAP AKTIF, SCROLLBAR DISEMBUNYIKAN */}
@@ -22,7 +27,13 @@ export default function AppSidebar() {
 
         <nav aria-label="Navigasi utama" className="space-y-1">
           {menuItems.map((item) => {
-            const isActive = item.href === "/";
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : item.href.startsWith("/")
+                  ? pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`)
+                  : false;
 
             return (
               <Link
