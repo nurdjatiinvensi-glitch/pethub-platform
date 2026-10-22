@@ -8,8 +8,11 @@ import CheckoutForm from "./components/CheckoutForm";
 import CheckoutResult from "./components/CheckoutResult";
 import CheckoutSummary from "./components/CheckoutSummary";
 import {
+  createFeedCareDonor,
+  createFeedCareOrder,
   getFeedCarePackages,
   type ContributorType,
+  type FeedCareOrder,
   type FeedCarePackage,
 } from "./lib/feedcare-checkout";
 
@@ -20,12 +23,15 @@ function CheckoutContent() {
   const [packages, setPackages] = useState<FeedCarePackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<FeedCareOrder | null>(null);
+
   const [contributorType, setContributorType] =
     useState<ContributorType>("guest");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,9 +61,36 @@ function CheckoutContent() {
     [packages, packageId],
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (selectedPackage) setIsSubmitted(true);
+
+    if (!selectedPackage || isSubmitting) return;
+
+    setSubmitError("");
+    setIsSubmitting(true);
+
+    try {
+      await createFeedCareDonor({
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+      });
+
+      const order = await createFeedCareOrder({
+        phone: phone.trim(),
+        packageId: selectedPackage.id,
+      });
+
+      setCreatedOrder(order);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Pesanan gagal dibuat. Silakan coba kembali.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (isLoading) {
@@ -86,13 +119,13 @@ function CheckoutContent() {
     );
   }
 
-  if (isSubmitted) {
+  if (createdOrder) {
     return (
       <CheckoutResult
         selectedPackage={selectedPackage}
         fullName={fullName}
         contributorType={contributorType}
-        onBack={() => setIsSubmitted(false)}
+        order={createdOrder}
       />
     );
   }
@@ -123,18 +156,36 @@ function CheckoutContent() {
           onSubmit={handleSubmit}
           className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]"
         >
-          <CheckoutForm
-            contributorType={contributorType}
-            onContributorTypeChange={setContributorType}
-            fullName={fullName}
-            onFullNameChange={setFullName}
-            email={email}
-            onEmailChange={setEmail}
-            phone={phone}
-            onPhoneChange={setPhone}
-          />
+          <div className="min-w-0">
+            <CheckoutForm
+              contributorType={contributorType}
+              onContributorTypeChange={setContributorType}
+              fullName={fullName}
+              onFullNameChange={setFullName}
+              email={email}
+              onEmailChange={setEmail}
+              phone={phone}
+              onPhoneChange={setPhone}
+            />
 
-          <CheckoutSummary selectedPackage={selectedPackage} />
+            {submitError && (
+              <div
+                role="alert"
+                className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"
+              >
+                {submitError}
+              </div>
+            )}
+          </div>
+
+          <div className={isSubmitting ? "pointer-events-none opacity-70" : ""}>
+            <CheckoutSummary selectedPackage={selectedPackage} />
+            {isSubmitting && (
+              <p className="mt-3 text-center text-sm text-gray-500">
+                Membuat pesanan...
+              </p>
+            )}
+          </div>
         </form>
       </div>
     </div>

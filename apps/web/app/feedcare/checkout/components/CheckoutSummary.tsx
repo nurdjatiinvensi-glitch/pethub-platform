@@ -47,10 +47,14 @@ export default function CheckoutSummary({ selectedPackage }: Props) {
 
       <button
         type="submit"
+        disabled={false}
         className="mt-6 min-h-12 w-full rounded-xl bg-[#2F7D4A] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#276A3F]"
       >
-        Simulasikan Checkout
+        Buat Pesanan &amp; Lanjutkan Pembayaran
       </button>
+      <p className="mt-3 text-center text-xs leading-5 text-gray-400">
+        Pesanan akan dibuat melalui sistem FeedCare.
+      </p>
 
       <p className="mt-3 text-center text-xs leading-5 text-gray-400">
         Mode demo. Belum ada pesanan atau pembayaran nyata yang dibuat.
