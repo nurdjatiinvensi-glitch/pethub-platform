@@ -69,3 +69,77 @@ model Payment {
   createdAt       TimestamptzString @default(now())
   updatedAt       temporal.updatedAtString()
 }
+
+
+model Category {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  isActive      Boolean       @default(true)
+
+  subcategories Subcategory[]
+  items         Item[]
+
+  createdAt     TimestamptzString @default(now())
+  updatedAt     temporal.updatedAtString()
+}
+
+model Subcategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
+  items       Item[]
+
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Item {
+  id             String   @id @default(uuid())
+  itemCode       String   @unique
+  name           String
+  itemType       String   @default("PRODUCT")
+  description    String?
+  price          Int      @default(0)
+  imageUrl       String?
+  isActive       Boolean  @default(true)
+
+  category       Category @relation(fields: [categoryId], references: [id])
+  categoryId     String
+
+  subcategory    Subcategory @relation(fields: [subcategoryId], references: [id])
+  subcategoryId  String
+
+  ownerType      String   @default("PETHUB")
+  ownerId        String?
+
+  specifications ItemSpecification[]
+
+  createdAt      TimestamptzString @default(now())
+  updatedAt      temporal.updatedAtString()
+}
+
+model ItemSpecification {
+  id       String @id @default(uuid())
+  name     String
+  value    String
+
+  item     Item   @relation(fields: [itemId], references: [id])
+  itemId   String
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  oldValue  String?
+  newValue  String?
+  createdAt TimestamptzString @default(now())
+}

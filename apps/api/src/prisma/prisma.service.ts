@@ -20,6 +20,12 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     await this.db.connect();
+
+    console.log(
+      'ORM MODELS:',
+      Object.keys(this.db.orm.public),
+    );
+
   }
 
   async onModuleDestroy() {
