@@ -105,7 +105,7 @@ model Item {
   name           String
   itemType       String   @default("PRODUCT")
   description    String?
-  price          Int      @default(0)
+  price          Decimal      @default(0)
   imageUrl       String?
   isActive       Boolean  @default(true)
 

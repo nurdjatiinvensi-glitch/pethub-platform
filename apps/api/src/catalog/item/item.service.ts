@@ -6,6 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { randomBytes } from 'node:crypto';
+
 import { AppLoggerService } from '../../common/logging/app-logger.service.js';
 import { AuditLogService } from '../../common/logging/audit-log.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -55,46 +57,32 @@ export class ItemService {
   // POST: Create Item
   async create(data: CreateItemDto) {
     if (
-      !data.itemCode?.trim() ||
       !data.name?.trim() ||
       !data.categoryId ||
       !data.subcategoryId
     ) {
       throw new BadRequestException(
-        'Item Code, Name, Category, dan Subcategory wajib diisi',
+        'Name, Category, dan Subcategory wajib diisi',
       );
     }
 
-    if (
-      typeof data.price !== 'number' ||
-      !Number.isFinite(data.price) ||
-      data.price < 0
-    ) {
-      throw new BadRequestException(
-        'Price harus berupa angka nol atau lebih',
-      );
-    }
+    // Validasi Decimal Price
+    this.validatePrice(data.price);
 
     const specificationsInput = data.specifications ?? [];
 
     this.validateSpecifications(specificationsInput);
-
-    const existingItem =
-      await this.prisma.client.orm.public.Item.first({
-        itemCode: data.itemCode.trim(),
-      });
-
-    if (existingItem) {
-      throw new ConflictException('Item Code sudah digunakan');
-    }
 
     await this.validateCategory(
       data.categoryId,
       data.subcategoryId,
     );
 
+    // Item Code dibuat otomatis oleh backend
+    const itemCode = await this.generateItemCode();
+
     const item = await this.prisma.client.orm.public.Item.create({
-      itemCode: data.itemCode.trim(),
+      itemCode,
       name: data.name.trim(),
       itemType: data.itemType ?? 'PRODUCT',
       description: data.description?.trim() ?? null,
@@ -145,37 +133,23 @@ export class ItemService {
   async update(id: string, data: Partial<CreateItemDto>) {
     const currentItem = await this.findOne(id);
 
-    if (data.itemCode !== undefined && !data.itemCode.trim()) {
-      throw new BadRequestException('Item Code wajib diisi');
+    // Item Code bersifat immutable
+    if (
+      data.itemCode !== undefined &&
+      data.itemCode !== currentItem.itemCode
+    ) {
+      throw new BadRequestException(
+        'Item Code tidak dapat diubah',
+      );
     }
 
     if (data.name !== undefined && !data.name.trim()) {
       throw new BadRequestException('Nama Item wajib diisi');
     }
 
-    if (
-      data.price !== undefined &&
-      (
-        typeof data.price !== 'number' ||
-        !Number.isFinite(data.price) ||
-        data.price < 0
-      )
-    ) {
-      throw new BadRequestException(
-        'Price harus berupa angka nol atau lebih',
-      );
-    }
-
-    // Periksa duplikasi Item Code
-    if (data.itemCode !== undefined) {
-      const existingItem =
-        await this.prisma.client.orm.public.Item.first({
-          itemCode: data.itemCode.trim(),
-        });
-
-      if (existingItem && existingItem.id !== id) {
-        throw new ConflictException('Item Code sudah digunakan');
-      }
+    // Validasi Decimal Price
+    if (data.price !== undefined) {
+      this.validatePrice(data.price);
     }
 
     // Validasi Category dan Subcategory
@@ -194,9 +168,6 @@ export class ItemService {
       await this.prisma.client.orm.public.Item
         .where({ id })
         .update({
-          ...(data.itemCode !== undefined && {
-            itemCode: data.itemCode.trim(),
-          }),
           ...(data.name !== undefined && {
             name: data.name.trim(),
           }),
@@ -335,6 +306,35 @@ export class ItemService {
     };
   }
 
+  // Helper: Generate Item Code Otomatis
+  private async generateItemCode(): Promise<string> {
+    const date = new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, '');
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const randomCode = randomBytes(3)
+        .toString('hex')
+        .toUpperCase();
+
+      const itemCode = `ITM-${date}-${randomCode}`;
+
+      const existingItem =
+        await this.prisma.client.orm.public.Item.first({
+          itemCode,
+        });
+
+      if (!existingItem) {
+        return itemCode;
+      }
+    }
+
+    throw new ConflictException(
+      'Gagal membuat Item Code. Silakan coba kembali.',
+    );
+  }
+
   // Helper: Validasi Category dan Subcategory
   private async validateCategory(
     categoryId: string,
@@ -363,6 +363,18 @@ export class ItemService {
     ) {
       throw new BadRequestException(
         'Subcategory tidak valid untuk Category yang dipilih',
+      );
+    }
+  }
+
+  // Helper: Validasi Decimal Price (maksimal 5 angka desimal)
+  private validatePrice(price: string) {
+    if (
+      typeof price !== 'string' ||
+      !/^\d+(?:\.\d{1,5})?$/.test(price)
+    ) {
+      throw new BadRequestException(
+        'Price harus berupa angka nol atau lebih dengan maksimal 5 angka desimal',
       );
     }
   }

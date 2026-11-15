@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -27,7 +28,8 @@ type Item = {
   name: string;
   itemType: string;
   description?: string | null;
-  price: number;
+  price: string | number;
+  imageUrl?: string | null;
   categoryId: string;
   subcategoryId?: string | null;
   ownerType: string;
@@ -57,6 +59,45 @@ function normalizeList<T>(data: unknown): T[] {
   return [];
 }
 
+// Format angka lokal: 1050,95 menjadi 1.050,95
+function formatPriceInput(value: string): string {
+  const cleaned = value.replace(/[^\d,]/g, "");
+  const commaIndex = cleaned.indexOf(",");
+
+  let integerPart = commaIndex >= 0 ? cleaned.slice(0, commaIndex) : cleaned;
+
+  const decimalPart =
+    commaIndex >= 0
+      ? cleaned
+          .slice(commaIndex + 1)
+          .replace(/,/g, "")
+          .slice(0, 5)
+      : "";
+
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  return commaIndex >= 0 ? `${integerPart},${decimalPart}` : integerPart;
+}
+
+// Format decimal dari database ke tampilan Indonesia
+// 1050.95 menjadi 1.050,95
+function apiPriceToInput(value: string | number): string {
+  const normalized = String(value);
+  const [integerPart, decimalPart] = normalized.split(".");
+
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  return decimalPart !== undefined
+    ? `${formattedInteger},${decimalPart.slice(0, 5)}`
+    : formattedInteger;
+}
+
+// Konversi format Indonesia ke decimal string API
+// 1.050,95 menjadi 1050.95
+function priceToApi(value: string): string {
+  return value.replace(/\./g, "").replace(",", ".");
+}
+
 export default function ItemEditForm({
   item,
   categories,
@@ -77,7 +118,8 @@ export default function ItemEditForm({
     name: item.name,
     itemType: item.itemType,
     description: item.description ?? "",
-    price: String(item.price),
+    price: apiPriceToInput(item.price),
+    imageUrl: item.imageUrl ?? "",
     categoryId: item.categoryId,
     subcategoryId: item.subcategoryId ?? "",
     ownerType: item.ownerType,
@@ -161,12 +203,28 @@ export default function ItemEditForm({
 
     setError("");
     setSuccess("");
+
+    const apiPrice = priceToApi(form.price);
+
+    if (!/^\d+(?:\.\d{1,5})?$/.test(apiPrice)) {
+      setError(
+        "Harga harus berupa angka nol atau lebih dengan maksimal 5 angka desimal.",
+      );
+      return;
+    }
+
     setSaving(true);
 
     try {
       const payload = {
-        ...form,
-        price: Number(form.price),
+        name: form.name,
+        itemType: form.itemType,
+        description: form.description,
+        price: apiPrice,
+        imageUrl: form.imageUrl.trim() || undefined,
+        categoryId: form.categoryId,
+        subcategoryId: form.subcategoryId,
+        ownerType: form.ownerType,
         ownerId: form.ownerId.trim() || undefined,
         specifications: specifications.filter(
           (item) => item.name.trim() && item.value.trim(),
@@ -230,15 +288,15 @@ export default function ItemEditForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Item Code *
-            </label>
+            <label className="mb-1 block text-sm font-medium">Item Code</label>
             <input
-              required
               value={form.itemCode}
-              onChange={(e) => updateField("itemCode", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              readOnly
+              className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
             />
+            <p className="mt-1 text-xs text-gray-400">
+              Item Code dibuat otomatis oleh sistem dan tidak dapat diubah.
+            </p>
           </div>
 
           <div>
@@ -269,13 +327,18 @@ export default function ItemEditForm({
             <label className="mb-1 block text-sm font-medium">Price *</label>
             <input
               required
-              type="number"
-              min="0"
-              step="1"
+              type="text"
+              inputMode="decimal"
               value={form.price}
-              onChange={(e) => updateField("price", e.target.value)}
+              onChange={(e) =>
+                updateField("price", formatPriceInput(e.target.value))
+              }
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              placeholder="1.050,95"
             />
+            <p className="mt-1 text-xs text-gray-500">
+              Gunakan koma untuk desimal. Maksimal 5 angka desimal.
+            </p>
           </div>
 
           <div>
@@ -340,6 +403,34 @@ export default function ItemEditForm({
                 onChange={(e) => updateField("ownerId", e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 placeholder="Merchant ID"
+              />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Image URL</label>
+          <input
+            type="url"
+            value={form.imageUrl}
+            onChange={(e) => updateField("imageUrl", e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            placeholder="https://example.com/image.jpg"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Masukkan alamat URL gambar item.
+          </p>
+
+          {form.imageUrl.trim() && (
+            <div className="mt-3">
+              <p className="mb-2 text-xs text-gray-500">Image Preview</p>
+              <Image
+                src={form.imageUrl}
+                alt="Item preview"
+                width={128}
+                height={128}
+                unoptimized
+                className="h-32 w-32 rounded-lg border border-gray-200 object-cover"
               />
             </div>
           )}
