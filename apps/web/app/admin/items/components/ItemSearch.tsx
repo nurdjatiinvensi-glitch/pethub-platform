@@ -31,13 +31,9 @@ export default function ItemSearch({ items }: { items: Item[] }) {
     if (!keyword) return items;
 
     return items.filter((item) =>
-      [
-        item.itemCode,
-        item.name,
-        item.categoryName,
-        item.ownerType,
-        item.ownerId ?? "",
-      ].some((value) => value.toLowerCase().includes(keyword)),
+      [item.name, item.categoryName, item.ownerType, item.ownerId ?? ""].some(
+        (value) => value.toLowerCase().includes(keyword),
+      ),
     );
   }, [items, search]);
 
@@ -75,7 +71,6 @@ export default function ItemSearch({ items }: { items: Item[] }) {
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-5 py-4 font-semibold">Item Code</th>
                 <th className="px-5 py-4 font-semibold">Item Name</th>
                 <th className="px-5 py-4 font-semibold">Category</th>
                 <th className="px-5 py-4 font-semibold">Owner</th>
@@ -88,10 +83,6 @@ export default function ItemSearch({ items }: { items: Item[] }) {
             <tbody className="divide-y divide-gray-100">
               {filteredItems.map((item) => (
                 <tr key={item.id} className="transition hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-5 py-4 font-medium text-gray-700">
-                    {item.itemCode}
-                  </td>
-
                   <td className="min-w-48 px-5 py-4 font-semibold text-gray-900">
                     {item.name}
                   </td>

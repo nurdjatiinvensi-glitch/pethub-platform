@@ -1,0 +1,1066 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.auditLog",
+    "label": "Create table \"auditLog\"",
+    "summary": "Creates table \"auditLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "auditLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"auditLog\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"auditLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"auditLog\"",
+        "sql": "CREATE TABLE \"public\".\"auditLog\" (\n  \"action\" text NOT NULL,\n  \"actorId\" text,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"entity\" text NOT NULL,\n  \"entityId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"newValue\" text,\n  \"oldValue\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"auditLog\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"auditLog\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.category",
+    "label": "Create table \"category\"",
+    "summary": "Creates table \"category\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "category"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"category\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"category\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"category\"",
+        "sql": "CREATE TABLE \"public\".\"category\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"id\" text NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"category\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"category\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.donor",
+    "label": "Create table \"donor\"",
+    "summary": "Creates table \"donor\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "donor"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"donor\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"donor\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"donor\"",
+        "sql": "CREATE TABLE \"public\".\"donor\" (\n  \"accountId\" text,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"phone\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"donor\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"donor\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.feedCareOrder",
+    "label": "Create table \"feedCareOrder\"",
+    "summary": "Creates table \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"feedCareOrder\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"feedCareOrder\"",
+        "sql": "CREATE TABLE \"public\".\"feedCareOrder\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"donorId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"mealsPurchased\" int4 NOT NULL,\n  \"orderNumber\" text NOT NULL,\n  \"packageId\" text NOT NULL,\n  \"quantity\" int4 DEFAULT 1 NOT NULL,\n  \"status\" text DEFAULT 'PENDING' NOT NULL,\n  \"totalAmount\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"feedCareOrder\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.feedCarePackage",
+    "label": "Create table \"feedCarePackage\"",
+    "summary": "Creates table \"feedCarePackage\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "feedCarePackage"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"feedCarePackage\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCarePackage\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"feedCarePackage\"",
+        "sql": "CREATE TABLE \"public\".\"feedCarePackage\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"id\" text NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"meals\" int4 NOT NULL,\n  \"name\" text NOT NULL,\n  \"price\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"feedCarePackage\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCarePackage\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.item",
+    "label": "Create table \"item\"",
+    "summary": "Creates table \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"item\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"item\"",
+        "sql": "CREATE TABLE \"public\".\"item\" (\n  \"categoryId\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"id\" text NOT NULL,\n  \"imageUrl\" text,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"itemCode\" text NOT NULL,\n  \"itemType\" text DEFAULT 'PRODUCT' NOT NULL,\n  \"name\" text NOT NULL,\n  \"ownerId\" text,\n  \"ownerType\" text DEFAULT 'PETHUB' NOT NULL,\n  \"price\" int4 DEFAULT 0 NOT NULL,\n  \"subcategoryId\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"item\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.itemSpecification",
+    "label": "Create table \"itemSpecification\"",
+    "summary": "Creates table \"itemSpecification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "itemSpecification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"itemSpecification\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"itemSpecification\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"itemSpecification\"",
+        "sql": "CREATE TABLE \"public\".\"itemSpecification\" (\n  \"id\" text NOT NULL,\n  \"itemId\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"value\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"itemSpecification\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"itemSpecification\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.payment",
+    "label": "Create table \"payment\"",
+    "summary": "Creates table \"payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"payment\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"payment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"payment\"",
+        "sql": "CREATE TABLE \"public\".\"payment\" (\n  \"amount\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"method\" text NOT NULL,\n  \"orderId\" text NOT NULL,\n  \"paidAmount\" int4,\n  \"paidAt\" timestamptz,\n  \"proofUrl\" text,\n  \"rejectionReason\" text,\n  \"status\" text DEFAULT 'PENDING' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"verifiedAt\" timestamptz,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"payment\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"payment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.subcategory",
+    "label": "Create table \"subcategory\"",
+    "summary": "Creates table \"subcategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "subcategory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"subcategory\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"subcategory\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"subcategory\"",
+        "sql": "CREATE TABLE \"public\".\"subcategory\" (\n  \"categoryId\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"id\" text NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"subcategory\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"subcategory\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.donor.donor_phone_key",
+    "label": "Add unique constraint on \"donor\" (phone)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "donor_phone_key",
+        "table": "donor"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"donor_phone_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "donor_phone_key",
+          "public",
+          "\"public\".\"donor\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"donor_phone_key\"",
+        "sql": "ALTER TABLE \"public\".\"donor\" ADD CONSTRAINT \"donor_phone_key\" UNIQUE (\"phone\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"donor_phone_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "donor_phone_key",
+          "public",
+          "\"public\".\"donor\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.feedCareOrder.feedCareOrder_orderNumber_key",
+    "label": "Add unique constraint on \"feedCareOrder\" (orderNumber)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "feedCareOrder_orderNumber_key",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"feedCareOrder_orderNumber_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_orderNumber_key",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"feedCareOrder_orderNumber_key\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\" ADD CONSTRAINT \"feedCareOrder_orderNumber_key\" UNIQUE (\"orderNumber\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"feedCareOrder_orderNumber_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_orderNumber_key",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.item.item_itemCode_key",
+    "label": "Add unique constraint on \"item\" (itemCode)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "item_itemCode_key",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"item_itemCode_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_itemCode_key",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"item_itemCode_key\"",
+        "sql": "ALTER TABLE \"public\".\"item\" ADD CONSTRAINT \"item_itemCode_key\" UNIQUE (\"itemCode\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"item_itemCode_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_itemCode_key",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.payment.payment_orderId_key",
+    "label": "Add unique constraint on \"payment\" (orderId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "payment_orderId_key",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"payment_orderId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_orderId_key",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"payment_orderId_key\"",
+        "sql": "ALTER TABLE \"public\".\"payment\" ADD CONSTRAINT \"payment_orderId_key\" UNIQUE (\"orderId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"payment_orderId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_orderId_key",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.feedCareOrder.feedCareOrder_donorId_idx_e0e8e1e7",
+    "label": "Create index \"feedCareOrder_donorId_idx_e0e8e1e7\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "feedCareOrder_donorId_idx_e0e8e1e7",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"feedCareOrder_donorId_idx_e0e8e1e7\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_donorId_idx_e0e8e1e7\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"feedCareOrder_donorId_idx_e0e8e1e7\"",
+        "sql": "CREATE INDEX \"feedCareOrder_donorId_idx_e0e8e1e7\" ON \"public\".\"feedCareOrder\" (\"donorId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"feedCareOrder_donorId_idx_e0e8e1e7\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_donorId_idx_e0e8e1e7\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.feedCareOrder.feedCareOrder_packageId_idx_51f866f4",
+    "label": "Create index \"feedCareOrder_packageId_idx_51f866f4\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "feedCareOrder_packageId_idx_51f866f4",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"feedCareOrder_packageId_idx_51f866f4\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_packageId_idx_51f866f4\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"feedCareOrder_packageId_idx_51f866f4\"",
+        "sql": "CREATE INDEX \"feedCareOrder_packageId_idx_51f866f4\" ON \"public\".\"feedCareOrder\" (\"packageId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"feedCareOrder_packageId_idx_51f866f4\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_packageId_idx_51f866f4\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.item.item_categoryId_idx_15c304f2",
+    "label": "Create index \"item_categoryId_idx_15c304f2\" on \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "item_categoryId_idx_15c304f2",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"item_categoryId_idx_15c304f2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item_categoryId_idx_15c304f2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"item_categoryId_idx_15c304f2\"",
+        "sql": "CREATE INDEX \"item_categoryId_idx_15c304f2\" ON \"public\".\"item\" (\"categoryId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"item_categoryId_idx_15c304f2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item_categoryId_idx_15c304f2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.item.item_subcategoryId_idx_d4b355f2",
+    "label": "Create index \"item_subcategoryId_idx_d4b355f2\" on \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "item_subcategoryId_idx_d4b355f2",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"item_subcategoryId_idx_d4b355f2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item_subcategoryId_idx_d4b355f2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"item_subcategoryId_idx_d4b355f2\"",
+        "sql": "CREATE INDEX \"item_subcategoryId_idx_d4b355f2\" ON \"public\".\"item\" (\"subcategoryId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"item_subcategoryId_idx_d4b355f2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"item_subcategoryId_idx_d4b355f2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.itemSpecification.itemSpecification_itemId_idx_41357140",
+    "label": "Create index \"itemSpecification_itemId_idx_41357140\" on \"itemSpecification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "itemSpecification_itemId_idx_41357140",
+        "table": "itemSpecification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"itemSpecification_itemId_idx_41357140\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"itemSpecification_itemId_idx_41357140\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"itemSpecification_itemId_idx_41357140\"",
+        "sql": "CREATE INDEX \"itemSpecification_itemId_idx_41357140\" ON \"public\".\"itemSpecification\" (\"itemId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"itemSpecification_itemId_idx_41357140\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"itemSpecification_itemId_idx_41357140\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.subcategory.subcategory_categoryId_idx_15c304f2",
+    "label": "Create index \"subcategory_categoryId_idx_15c304f2\" on \"subcategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "subcategory_categoryId_idx_15c304f2",
+        "table": "subcategory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"subcategory_categoryId_idx_15c304f2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"subcategory_categoryId_idx_15c304f2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"subcategory_categoryId_idx_15c304f2\"",
+        "sql": "CREATE INDEX \"subcategory_categoryId_idx_15c304f2\" ON \"public\".\"subcategory\" (\"categoryId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"subcategory_categoryId_idx_15c304f2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"subcategory_categoryId_idx_15c304f2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.feedCareOrder.feedCareOrder_donorId_fkey",
+    "label": "Add foreign key \"feedCareOrder_donorId_fkey\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "feedCareOrder_donorId_fkey",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"feedCareOrder_donorId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_donorId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"feedCareOrder_donorId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\"\nADD CONSTRAINT \"feedCareOrder_donorId_fkey\"\nFOREIGN KEY (\"donorId\")\nREFERENCES \"public\".\"donor\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"feedCareOrder_donorId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_donorId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.feedCareOrder.feedCareOrder_packageId_fkey",
+    "label": "Add foreign key \"feedCareOrder_packageId_fkey\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "feedCareOrder_packageId_fkey",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"feedCareOrder_packageId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_packageId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"feedCareOrder_packageId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\"\nADD CONSTRAINT \"feedCareOrder_packageId_fkey\"\nFOREIGN KEY (\"packageId\")\nREFERENCES \"public\".\"feedCarePackage\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"feedCareOrder_packageId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_packageId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.item.item_categoryId_fkey",
+    "label": "Add foreign key \"item_categoryId_fkey\" on \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "item_categoryId_fkey",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"item_categoryId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_categoryId_fkey",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"item_categoryId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"item\"\nADD CONSTRAINT \"item_categoryId_fkey\"\nFOREIGN KEY (\"categoryId\")\nREFERENCES \"public\".\"category\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"item_categoryId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_categoryId_fkey",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.item.item_subcategoryId_fkey",
+    "label": "Add foreign key \"item_subcategoryId_fkey\" on \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "item_subcategoryId_fkey",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"item_subcategoryId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_subcategoryId_fkey",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"item_subcategoryId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"item\"\nADD CONSTRAINT \"item_subcategoryId_fkey\"\nFOREIGN KEY (\"subcategoryId\")\nREFERENCES \"public\".\"subcategory\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"item_subcategoryId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "item_subcategoryId_fkey",
+          "public",
+          "\"public\".\"item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.itemSpecification.itemSpecification_itemId_fkey",
+    "label": "Add foreign key \"itemSpecification_itemId_fkey\" on \"itemSpecification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "itemSpecification_itemId_fkey",
+        "table": "itemSpecification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"itemSpecification_itemId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "itemSpecification_itemId_fkey",
+          "public",
+          "\"public\".\"itemSpecification\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"itemSpecification_itemId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"itemSpecification\"\nADD CONSTRAINT \"itemSpecification_itemId_fkey\"\nFOREIGN KEY (\"itemId\")\nREFERENCES \"public\".\"item\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"itemSpecification_itemId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "itemSpecification_itemId_fkey",
+          "public",
+          "\"public\".\"itemSpecification\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.payment.payment_orderId_fkey",
+    "label": "Add foreign key \"payment_orderId_fkey\" on \"payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "payment_orderId_fkey",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"payment_orderId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_orderId_fkey",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"payment_orderId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"payment\"\nADD CONSTRAINT \"payment_orderId_fkey\"\nFOREIGN KEY (\"orderId\")\nREFERENCES \"public\".\"feedCareOrder\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"payment_orderId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_orderId_fkey",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.subcategory.subcategory_categoryId_fkey",
+    "label": "Add foreign key \"subcategory_categoryId_fkey\" on \"subcategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "subcategory_categoryId_fkey",
+        "table": "subcategory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"subcategory_categoryId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "subcategory_categoryId_fkey",
+          "public",
+          "\"public\".\"subcategory\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"subcategory_categoryId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"subcategory\"\nADD CONSTRAINT \"subcategory_categoryId_fkey\"\nFOREIGN KEY (\"categoryId\")\nREFERENCES \"public\".\"category\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"subcategory_categoryId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "subcategory_categoryId_fkey",
+          "public",
+          "\"public\".\"subcategory\""
+        ]
+      }
+    ]
+  }
+]

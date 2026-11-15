@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'54727e1c56c6ba0c7955dcb5261d70fc34367842fe0565c87f97c6400da57073'>;
+  StorageHashBase<'a2a31bb4c5df05cc97358822e67f162d2ce17962f0f4e50d35a86500b417e061'>;
 export type ExecutionHash =
   ExecutionHashBase<'ab42720a98de8ceaf8de38eb3d5ab74f7f03bf7922e40719d62cbdcaf4285e49'>;
 export type ProfileHash =
@@ -297,7 +297,7 @@ export type FieldOutputTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly itemType: CodecTypes['pg/text@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
-      readonly price: CodecTypes['pg/int4@1']['output'];
+      readonly price: CodecTypes['pg/numeric@1']['output'];
       readonly imageUrl: CodecTypes['pg/text@1']['output'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly categoryId: CodecTypes['pg/text@1']['output'];
@@ -395,7 +395,7 @@ export type FieldInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly itemType: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
-      readonly price: CodecTypes['pg/int4@1']['input'];
+      readonly price: CodecTypes['pg/numeric@1']['input'];
       readonly imageUrl: CodecTypes['pg/text@1']['input'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly categoryId: CodecTypes['pg/text@1']['input'];
@@ -499,7 +499,7 @@ export type StorageColumnTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly ownerId: CodecTypes['pg/text@1']['output'] | null;
       readonly ownerType: CodecTypes['pg/text@1']['output'];
-      readonly price: CodecTypes['pg/int4@1']['output'];
+      readonly price: CodecTypes['pg/numeric@1']['output'];
       readonly subcategoryId: CodecTypes['pg/text@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -597,7 +597,7 @@ export type StorageColumnInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly ownerId: CodecTypes['pg/text@1']['input'] | null;
       readonly ownerType: CodecTypes['pg/text@1']['input'];
-      readonly price: CodecTypes['pg/int4@1']['input'];
+      readonly price: CodecTypes['pg/numeric@1']['input'];
       readonly subcategoryId: CodecTypes['pg/text@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -718,7 +718,7 @@ export namespace Models {
     name: CodecTypes['pg/text@1']['output'];
     itemType: CodecTypes['pg/text@1']['output'];
     description: CodecTypes['pg/text@1']['output'] | null;
-    price: CodecTypes['pg/int4@1']['output'];
+    price: CodecTypes['pg/numeric@1']['output'];
     imageUrl: CodecTypes['pg/text@1']['output'] | null;
     isActive: CodecTypes['pg/bool@1']['output'];
     categoryId: CodecTypes['pg/text@1']['output'];
@@ -1111,12 +1111,12 @@ type ContractBase = Omit<
                   readonly nullable: true;
                 };
                 readonly price: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'numeric';
+                  readonly codecId: 'pg/numeric@1';
                   readonly nullable: false;
                   readonly default: {
                     readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                    readonly value: DefaultLiteralValue<'pg/numeric@1', 0>;
                   };
                 };
                 readonly imageUrl: {
@@ -1833,7 +1833,7 @@ type ContractBase = Omit<
               };
               readonly price: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/numeric@1' };
               };
               readonly imageUrl: {
                 readonly nullable: true;

@@ -1,14 +1,18 @@
+
 export interface CreateItemSpecificationDto {
   name: string;
   value: string;
 }
 
 export interface CreateItemDto {
-  itemCode: string;
+  // Item Code dibuat otomatis oleh backend
+  // Tetap optional untuk kompatibilitas proses update
+  itemCode?: string;
+
   name: string;
   itemType?: string;
   description?: string;
-  price: number;
+  price: string;
   imageUrl?: string;
   categoryId: string;
   subcategoryId: string;
