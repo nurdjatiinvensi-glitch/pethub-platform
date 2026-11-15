@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -43,6 +44,32 @@ function normalizeList<T>(data: unknown): T[] {
   return [];
 }
 
+// Format angka: 1050,95 menjadi 1.050,95
+function formatPriceInput(value: string): string {
+  const cleaned = value.replace(/[^\d,]/g, "");
+  const commaIndex = cleaned.indexOf(",");
+
+  let integerPart = commaIndex >= 0 ? cleaned.slice(0, commaIndex) : cleaned;
+
+  const decimalPart =
+    commaIndex >= 0
+      ? cleaned
+          .slice(commaIndex + 1)
+          .replace(/,/g, "")
+          .slice(0, 5)
+      : "";
+
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  return commaIndex >= 0 ? `${integerPart},${decimalPart}` : integerPart;
+}
+
+// Konversi format lokal ke decimal string API
+// 1.050,95 menjadi 1050.95
+function priceToApi(value: string): string {
+  return value.replace(/\./g, "").replace(",", ".");
+}
+
 export default function ItemCreateForm({
   categories,
 }: {
@@ -58,11 +85,11 @@ export default function ItemCreateForm({
   const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
-    itemCode: "",
     name: "",
     itemType: "PRODUCT",
     description: "",
     price: "",
+    imageUrl: "",
     categoryId: "",
     subcategoryId: "",
     ownerType: "PETHUB",
@@ -141,12 +168,23 @@ export default function ItemCreateForm({
 
     setError("");
     setSuccess("");
+
+    const apiPrice = priceToApi(form.price);
+
+    if (!/^\d+(?:\.\d{1,5})?$/.test(apiPrice)) {
+      setError(
+        "Harga harus berupa angka nol atau lebih dengan maksimal 5 angka desimal.",
+      );
+      return;
+    }
+
     setSaving(true);
 
     try {
       const payload = {
         ...form,
-        price: Number(form.price),
+        price: apiPrice,
+        imageUrl: form.imageUrl.trim() || undefined,
         ownerId: form.ownerId.trim() || undefined,
         specifications: specifications.filter(
           (item) => item.name.trim() && item.value.trim(),
@@ -171,17 +209,19 @@ export default function ItemCreateForm({
       }
 
       setSuccess("Item berhasil ditambahkan.");
+
       setForm({
-        itemCode: "",
         name: "",
         itemType: "PRODUCT",
         description: "",
         price: "",
+        imageUrl: "",
         categoryId: "",
         subcategoryId: "",
         ownerType: "PETHUB",
         ownerId: "",
       });
+
       setSpecifications([]);
       setSubcategories([]);
 
@@ -232,19 +272,6 @@ export default function ItemCreateForm({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">
-                Item Code *
-              </label>
-              <input
-                required
-                value={form.itemCode}
-                onChange={(e) => updateField("itemCode", e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="PET-CAT-FOOD-001"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium">
                 Item Name *
               </label>
               <input
@@ -274,14 +301,18 @@ export default function ItemCreateForm({
               <label className="mb-1 block text-sm font-medium">Price *</label>
               <input
                 required
-                type="number"
-                min="0"
-                step="1"
+                type="text"
+                inputMode="decimal"
                 value={form.price}
-                onChange={(e) => updateField("price", e.target.value)}
+                onChange={(e) =>
+                  updateField("price", formatPriceInput(e.target.value))
+                }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="175000"
+                placeholder="1.050,95"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Gunakan koma untuk desimal. Maksimal 5 angka desimal.
+              </p>
             </div>
 
             <div>
@@ -351,6 +382,34 @@ export default function ItemCreateForm({
                   onChange={(e) => updateField("ownerId", e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   placeholder="Merchant ID"
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">Image URL</label>
+            <input
+              type="url"
+              value={form.imageUrl}
+              onChange={(e) => updateField("imageUrl", e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Masukkan alamat URL gambar item.
+            </p>
+
+            {form.imageUrl.trim() && (
+              <div className="mt-3">
+                <p className="mb-2 text-xs text-gray-500">Image Preview</p>
+                <Image
+                  src={form.imageUrl}
+                  alt="Item preview"
+                  width={128}
+                  height={128}
+                  unoptimized
+                  className="h-32 w-32 rounded-lg border border-gray-200 object-cover"
                 />
               </div>
             )}
