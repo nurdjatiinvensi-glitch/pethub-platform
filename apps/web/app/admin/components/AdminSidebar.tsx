@@ -14,6 +14,7 @@ export default function AdminSidebar({
 }) {
   const pathname = usePathname();
   const isItemsActive = pathname.startsWith("/admin/items");
+  const isCategoriesActive = pathname.startsWith("/admin/categories");
 
   const linkClass = (active: boolean) =>
     `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors ${
@@ -78,6 +79,14 @@ export default function AdminSidebar({
             >
               <AppIcon name="package" size={18} />
               <span>Items</span>
+            </Link>
+            <Link
+              href="/admin/categories"
+              onClick={onClose}
+              className={`ml-3 ${linkClass(isCategoriesActive)}`}
+            >
+              <AppIcon name="package" size={18} />
+              <span>Categories</span>
             </Link>
           </nav>
         </div>
