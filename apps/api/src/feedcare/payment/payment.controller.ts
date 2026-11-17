@@ -4,23 +4,17 @@ import {
   Get,
   Param,
   Patch,
-  Post,
 } from '@nestjs/common';
 
 import { PaymentService } from './payment.service.js';
 
+// Route yang menyentuh Order (POST order/:orderId dan PATCH order/:orderId/verify)
+// dilayani oleh OrderPaymentController di modul Order. URL-nya tetap sama.
 @Controller('feedcare/payments')
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
   ) {}
-
-  @Post('order/:orderId')
-  createForOrder(
-    @Param('orderId') orderId: string,
-  ) {
-    return this.paymentService.createForOrder(orderId);
-  }
 
   @Get('order/:orderId')
   findByOrder(
@@ -43,13 +37,6 @@ export class PaymentController {
       data.paidAmount,
       data.proofUrl,
     );
-  }
-
-  @Patch('order/:orderId/verify')
-  verify(
-    @Param('orderId') orderId: string,
-  ) {
-    return this.paymentService.verify(orderId);
   }
 
   @Patch('order/:orderId/reject')

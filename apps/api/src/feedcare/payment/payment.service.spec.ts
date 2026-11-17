@@ -1,24 +1,33 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuditLogService } from '../../common/logging/audit-log.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { transitionPayment } from './payment-state.js';
 import { PaymentService } from './payment.service.js';
+
+// transitionPayment menjalankan SQL asli; di unit test cukup kita mock hasilnya
+// (true = satu baris berhasil diubah). Perilaku SQL-nya diuji di test integrasi.
+vi.mock('./payment-state.js', () => ({ transitionPayment: vi.fn() }));
 
 describe('PaymentService', () => {
   let service: PaymentService;
   let prismaMock: any;
+  const auditMock = { log: vi.fn() };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     prismaMock = {
       client: {
+        // transaction(fn) menjalankan fn dengan konteks yang sama (tanpa DB asli).
+        transaction: vi.fn(async (fn: (tx: unknown) => unknown) =>
+          fn(prismaMock.client),
+        ),
         orm: {
           public: {
             Payment: {
               first: vi.fn(),
               create: vi.fn(),
-              where: vi.fn(),
-            },
-            FeedCareOrder: {
-              first: vi.fn(),
               where: vi.fn(),
             },
           },
@@ -33,6 +42,7 @@ describe('PaymentService', () => {
           provide: PrismaService,
           useValue: prismaMock,
         },
+        { provide: AuditLogService, useValue: auditMock },
       ],
     }).compile();
 
@@ -154,40 +164,27 @@ describe('PaymentService', () => {
   });
 
   describe('verify', () => {
-    it('should mark payment and order as PAID', async () => {
-      const payment = {
-        id: 'payment-123',
-        orderId: 'order-123',
-        amount: 50000,
-        status: 'VERIFYING',
-      };
+    const verifying = {
+      id: 'payment-123',
+      orderId: 'order-123',
+      amount: 50000,
+      status: 'VERIFYING',
+    };
 
-      prismaMock.client.orm.public.Payment.first.mockResolvedValue(payment);
+    it('should move VERIFYING to PAID with one conditional update', async () => {
+      const tx = prismaMock.client;
+      tx.orm.public.Payment.first
+        .mockResolvedValueOnce(verifying)
+        .mockResolvedValueOnce({ ...verifying, status: 'PAID' });
+      vi.mocked(transitionPayment).mockResolvedValue(true);
 
-      const paymentUpdateMock = vi.fn().mockResolvedValue({
-        ...payment,
-        status: 'PAID',
-      });
+      const result = await service.verify('order-123', tx);
 
-      const orderUpdateMock = vi.fn().mockResolvedValue({
-        id: 'order-123',
-        status: 'PAID',
-      });
-
-      prismaMock.client.orm.public.Payment.where.mockReturnValue({
-        update: paymentUpdateMock,
-      });
-
-      prismaMock.client.orm.public.FeedCareOrder.where.mockReturnValue({
-        update: orderUpdateMock,
-      });
-
-      const result = await service.verify('order-123');
-
-      expect(result).toBeDefined();
-      expect(result!.status).toBe('PAID');
-
-      expect(paymentUpdateMock).toHaveBeenCalledWith(
+      expect(result.status).toBe('PAID');
+      expect(transitionPayment).toHaveBeenCalledWith(
+        tx,
+        'payment-123',
+        'VERIFYING',
         expect.objectContaining({
           status: 'PAID',
           paidAt: expect.any(String),
@@ -195,64 +192,90 @@ describe('PaymentService', () => {
         }),
       );
 
-      expect(orderUpdateMock).toHaveBeenCalledWith({
-        status: 'PAID',
-      });
+      // Batas modul: Payment tidak boleh membaca atau mengubah tabel order.
+      expect(prismaMock.client.orm.public.FeedCareOrder).toBeUndefined();
+    });
+
+    it('should fail when another request already changed it (0 rows updated)', async () => {
+      const tx = prismaMock.client;
+      tx.orm.public.Payment.first.mockResolvedValue(verifying);
+      // Dua admin menekan verify bersamaan: database mengubah 0 baris untuk yang kalah.
+      vi.mocked(transitionPayment).mockResolvedValue(false);
+
+      await expect(service.verify('order-123', tx)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject verification when payment is not VERIFYING', async () => {
-      prismaMock.client.orm.public.Payment.first.mockResolvedValue({
-        id: 'payment-123',
-        orderId: 'order-123',
+      const tx = prismaMock.client;
+      tx.orm.public.Payment.first.mockResolvedValue({
+        ...verifying,
         status: 'PENDING',
       });
 
-      await expect(service.verify('order-123')).rejects.toThrow(
+      await expect(service.verify('order-123', tx)).rejects.toThrow(
         BadRequestException,
       );
-
-      expect(
-        prismaMock.client.orm.public.FeedCareOrder.where,
-      ).not.toHaveBeenCalled();
+      expect(transitionPayment).not.toHaveBeenCalled();
     });
   });
 
   describe('reject', () => {
-    it('should reject payment and save the rejection reason', async () => {
-      prismaMock.client.orm.public.Payment.first.mockResolvedValue({
-        id: 'payment-123',
-        orderId: 'order-123',
-        status: 'VERIFYING',
-      });
+    const verifying = {
+      id: 'payment-123',
+      orderId: 'order-123',
+      status: 'VERIFYING',
+    };
 
-      const updateMock = vi.fn().mockResolvedValue({
-        id: 'payment-123',
-        status: 'REJECTED',
-        rejectionReason: 'Bukti pembayaran tidak jelas',
-      });
-
-      prismaMock.client.orm.public.Payment.where.mockReturnValue({
-        update: updateMock,
-      });
+    it('should reject payment, save the reason, and audit in one transaction', async () => {
+      prismaMock.client.orm.public.Payment.first
+        .mockResolvedValueOnce(verifying)
+        .mockResolvedValueOnce({
+          ...verifying,
+          status: 'REJECTED',
+          rejectionReason: 'Bukti pembayaran tidak jelas',
+        });
+      vi.mocked(transitionPayment).mockResolvedValue(true);
 
       const result = await service.reject(
         'order-123',
         'Bukti pembayaran tidak jelas',
       );
 
-      expect(result).toBeDefined();
-      expect(result!.status).toBe('REJECTED');
+      expect(result.status).toBe('REJECTED');
+      expect(transitionPayment).toHaveBeenCalledWith(
+        prismaMock.client,
+        'payment-123',
+        'VERIFYING',
+        { status: 'REJECTED', rejectionReason: 'Bukti pembayaran tidak jelas' },
+      );
 
-      expect(updateMock).toHaveBeenCalledWith({
-        status: 'REJECTED',
-        rejectionReason: 'Bukti pembayaran tidak jelas',
-      });
+      expect(prismaMock.client.transaction).toHaveBeenCalledTimes(1);
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'FEEDCARE_PAYMENT_REJECTED',
+          entity: 'Payment',
+          entityId: 'payment-123',
+        }),
+        prismaMock.client,
+      );
+    });
+
+    it('should not audit when the payment was already changed (0 rows)', async () => {
+      prismaMock.client.orm.public.Payment.first.mockResolvedValue(verifying);
+      vi.mocked(transitionPayment).mockResolvedValue(false);
+
+      await expect(
+        service.reject('order-123', 'Bukti tidak valid'),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(auditMock.log).not.toHaveBeenCalled();
     });
 
     it('should reject payment rejection when status is not VERIFYING', async () => {
       prismaMock.client.orm.public.Payment.first.mockResolvedValue({
-        id: 'payment-123',
-        orderId: 'order-123',
+        ...verifying,
         status: 'PAID',
       });
 
@@ -260,9 +283,8 @@ describe('PaymentService', () => {
         service.reject('order-123', 'Bukti tidak valid'),
       ).rejects.toThrow(BadRequestException);
 
-      expect(
-        prismaMock.client.orm.public.Payment.where,
-      ).not.toHaveBeenCalled();
+      expect(transitionPayment).not.toHaveBeenCalled();
+      expect(auditMock.log).not.toHaveBeenCalled();
     });
   });
 });

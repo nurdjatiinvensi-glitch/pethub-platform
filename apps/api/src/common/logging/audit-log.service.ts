@@ -1,5 +1,6 @@
 
 import { Injectable } from '@nestjs/common';
+import type { DbContext } from '../../prisma/db-context.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 export interface CreateAuditLog {
@@ -15,8 +16,9 @@ export interface CreateAuditLog {
 export class AuditLogService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async log(data: CreateAuditLog) {
-    return this.prisma.client.orm.public.AuditLog.create({
+  // `db` opsional: isi dengan tx agar audit log tersimpan dalam transaksi yang sama.
+  async log(data: CreateAuditLog, db: DbContext = this.prisma.client) {
+    return db.orm.public.AuditLog.create({
       actorId: data.actorId ?? null,
       action: data.action,
       entity: data.entity,
