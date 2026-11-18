@@ -1,19 +1,20 @@
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
 
 import { DonorController } from './donor.controller.js';
 import { DonorService } from './donor.service.js';
 
 describe('DonorController', () => {
   let controller: DonorController;
+  let app: INestApplication;
   let donorService: {
     create: ReturnType<typeof vi.fn>;
-    findAll: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
     donorService = {
       create: vi.fn(),
-      findAll: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -27,27 +28,27 @@ describe('DonorController', () => {
     }).compile();
 
     controller = module.get<DonorController>(DonorController);
+    app = module.createNestApplication();
+    await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findAll', () => {
-    it('should return all donors from the service', async () => {
-      const donors = [
-        {
-          id: 'donor-123',
-          name: 'DJ',
-          phone: '08123456789',
-        },
-      ];
+  // Regresi keamanan: daftar donor berisi nama, email, dan nomor HP orang lain.
+  // Route GET ini sengaja dihapus. Jika ada yang menambahkannya lagi, test gagal.
+  describe('daftar donor tidak boleh terbuka', () => {
+    it('GET /feedcare/donors tidak ada (404)', async () => {
+      await request(app.getHttpServer()).get('/feedcare/donors').expect(404);
+    });
 
-      donorService.findAll.mockResolvedValue(donors);
-
-      await expect(controller.findAll()).resolves.toEqual(donors);
-
-      expect(donorService.findAll).toHaveBeenCalledOnce();
+    it('service tidak lagi menyediakan findAll', () => {
+      expect('findAll' in DonorService.prototype).toBe(false);
     });
   });
 
@@ -71,6 +72,15 @@ describe('DonorController', () => {
       );
 
       expect(donorService.create).toHaveBeenCalledWith(donorData);
+    });
+
+    it('POST /feedcare/donors tetap berfungsi (dipakai checkout web)', async () => {
+      donorService.create.mockResolvedValue({ id: 'donor-1' });
+
+      await request(app.getHttpServer())
+        .post('/feedcare/donors')
+        .send({ name: 'DJ', phone: '08123456789' })
+        .expect(201);
     });
   });
 });

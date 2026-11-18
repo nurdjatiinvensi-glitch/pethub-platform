@@ -4,45 +4,45 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { AuditLogService } from '../../common/logging/audit-log.service.js';
+import type { DbContext, TxContext } from '../../prisma/db-context.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { transitionPayment } from './payment-state.js';
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLog: AuditLogService,
+  ) {}
 
-  async createForOrder(orderId: string) {
-    const order = await this.prisma.client.orm.public.FeedCareOrder.first({
-      id: orderId,
+  // Nominal tagihan diberikan oleh pemanggil (modul Order). Payment tidak
+  // membaca tabel order. `db` opsional agar bisa ikut transaksi pemanggil.
+  async createForOrder(
+    orderId: string,
+    amount: number,
+    db: DbContext = this.prisma.client,
+  ) {
+    const existingPayment = await db.orm.public.Payment.first({
+      orderId,
     });
-
-    if (!order) {
-      throw new NotFoundException(
-        'FeedCare Order tidak ditemukan.',
-      );
-    }
-
-    const existingPayment =
-      await this.prisma.client.orm.public.Payment.first({
-        orderId,
-      });
 
     if (existingPayment) {
       return existingPayment;
     }
 
-    return this.prisma.client.orm.public.Payment.create({
-      orderId: order.id,
-      amount: order.totalAmount,
+    return db.orm.public.Payment.create({
+      orderId,
+      amount,
       method: 'QRIS',
       status: 'PENDING',
     });
   }
 
-  async findByOrder(orderId: string) {
-    const payment =
-      await this.prisma.client.orm.public.Payment.first({
-        orderId,
-      });
+  async findByOrder(orderId: string, db: DbContext = this.prisma.client) {
+    const payment = await db.orm.public.Payment.first({
+      orderId,
+    });
 
     if (!payment) {
       throw new NotFoundException(
@@ -53,7 +53,6 @@ export class PaymentService {
     return payment;
   }
 
-  
   async submitProof(
     orderId: string,
     paidAmount: number,
@@ -91,8 +90,11 @@ export class PaymentService {
       });
   }
 
-  async verify(orderId: string) {
-    const payment = await this.findByOrder(orderId);
+  // Hanya mengubah payment. Mengubah status order dan mencatat audit log adalah
+  // tugas modul Order (OrderService.verifyPayment), dalam satu transaksi.
+  // Wajib dipanggil dengan `tx` agar perubahan status bersifat atomik.
+  async verify(orderId: string, tx: TxContext) {
+    const payment = await this.findByOrder(orderId, tx);
 
     if (payment.status !== 'VERIFYING') {
       throw new BadRequestException(
@@ -100,49 +102,61 @@ export class PaymentService {
       );
     }
 
-    const now = new Date();
+    const now = new Date().toISOString();
 
-    const updatedPayment =
-      await this.prisma.client.orm.public.Payment
-        .where({
-          id: payment.id,
-        })
-        .update({
-          status: 'PAID',
-paidAt: new Date().toISOString(),
-verifiedAt: new Date().toISOString(),
-        });
+    // Jika dua admin menekan verify bersamaan, hanya satu yang berhasil
+    // mengubah baris; yang lain mendapat `false` dan ditolak.
+    const changed = await transitionPayment(tx, payment.id, 'VERIFYING', {
+      status: 'PAID',
+      paidAt: now,
+      verifiedAt: now,
+    });
 
-    await this.prisma.client.orm.public.FeedCareOrder
-      .where({
-        id: orderId,
-      })
-      .update({
-        status: 'PAID',
-      });
+    if (!changed) {
+      throw new BadRequestException(
+        'Payment belum berada pada status VERIFYING.',
+      );
+    }
 
-    return updatedPayment;
+    return this.findByOrder(orderId, tx);
   }
 
   async reject(
     orderId: string,
     rejectionReason: string,
   ) {
-    const payment = await this.findByOrder(orderId);
+    return this.prisma.client.transaction(async (tx) => {
+      const payment = await this.findByOrder(orderId, tx);
 
-    if (payment.status !== 'VERIFYING') {
-      throw new BadRequestException(
-        'Payment belum berada pada status VERIFYING.',
-      );
-    }
+      if (payment.status !== 'VERIFYING') {
+        throw new BadRequestException(
+          'Payment belum berada pada status VERIFYING.',
+        );
+      }
 
-    return this.prisma.client.orm.public.Payment
-      .where({
-        id: payment.id,
-      })
-      .update({
+      const changed = await transitionPayment(tx, payment.id, 'VERIFYING', {
         status: 'REJECTED',
         rejectionReason,
       });
+
+      if (!changed) {
+        throw new BadRequestException(
+          'Payment belum berada pada status VERIFYING.',
+        );
+      }
+
+      await this.auditLog.log(
+        {
+          action: 'FEEDCARE_PAYMENT_REJECTED',
+          entity: 'Payment',
+          entityId: payment.id,
+          oldValue: { status: 'VERIFYING' },
+          newValue: { status: 'REJECTED', rejectionReason, orderId },
+        },
+        tx,
+      );
+
+      return this.findByOrder(orderId, tx);
+    });
   }
 }

@@ -39,25 +39,6 @@ describe('DonorService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAll', () => {
-    it('should return all donors', async () => {
-      const donors = [
-        {
-          id: 'donor-123',
-          name: 'DJ',
-          phone: '08123456789',
-          email: 'dj@example.com',
-        },
-      ];
-
-      prismaMock.client.orm.public.Donor.all.mockResolvedValue(donors);
-
-      await expect(service.findAll()).resolves.toEqual(donors);
-
-      expect(prismaMock.client.orm.public.Donor.all).toHaveBeenCalledOnce();
-    });
-  });
-
   describe('create', () => {
     const donorData = {
       name: 'DJ',

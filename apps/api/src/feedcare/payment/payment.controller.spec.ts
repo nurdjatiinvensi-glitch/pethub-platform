@@ -12,10 +12,8 @@ describe('PaymentController', () => {
         {
           provide: PaymentService,
           useValue: {
-            createForOrder: vi.fn(),
             findByOrder: vi.fn(),
             submitProof: vi.fn(),
-            verify: vi.fn(),
             reject: vi.fn(),
           },
         },
