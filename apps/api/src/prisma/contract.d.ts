@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'a2a31bb4c5df05cc97358822e67f162d2ce17962f0f4e50d35a86500b417e061'>;
+  StorageHashBase<'896207bb687d3179b9b57ecf4af8bdc9583e3af4cc6778166a0b92fb26e6963f'>;
 export type ExecutionHash =
   ExecutionHashBase<'ab42720a98de8ceaf8de38eb3d5ab74f7f03bf7922e40719d62cbdcaf4285e49'>;
 export type ProfileHash =
@@ -273,10 +273,11 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
       readonly donorId: CodecTypes['pg/text@1']['output'];
-      readonly packageId: CodecTypes['pg/text@1']['output'];
+      readonly packageId: CodecTypes['pg/text@1']['output'] | null;
+      readonly itemId: CodecTypes['pg/text@1']['output'] | null;
       readonly quantity: CodecTypes['pg/int4@1']['output'];
-      readonly mealsPurchased: CodecTypes['pg/int4@1']['output'];
-      readonly totalAmount: CodecTypes['pg/int4@1']['output'];
+      readonly mealsPurchased: CodecTypes['pg/int4@1']['output'] | null;
+      readonly totalAmount: CodecTypes['pg/numeric@1']['output'];
       readonly status: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -300,6 +301,7 @@ export type FieldOutputTypes = {
       readonly price: CodecTypes['pg/numeric@1']['output'];
       readonly imageUrl: CodecTypes['pg/text@1']['output'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly isFeedCareEligible: CodecTypes['pg/bool@1']['output'];
       readonly categoryId: CodecTypes['pg/text@1']['output'];
       readonly subcategoryId: CodecTypes['pg/text@1']['output'];
       readonly ownerType: CodecTypes['pg/text@1']['output'];
@@ -316,8 +318,8 @@ export type FieldOutputTypes = {
     readonly Payment: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly orderId: CodecTypes['pg/text@1']['output'];
-      readonly amount: CodecTypes['pg/int4@1']['output'];
-      readonly paidAmount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly amount: CodecTypes['pg/numeric@1']['output'];
+      readonly paidAmount: CodecTypes['pg/numeric@1']['output'] | null;
       readonly method: CodecTypes['pg/text@1']['output'];
       readonly status: CodecTypes['pg/text@1']['output'];
       readonly proofUrl: CodecTypes['pg/text@1']['output'] | null;
@@ -371,10 +373,11 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
       readonly donorId: CodecTypes['pg/text@1']['input'];
-      readonly packageId: CodecTypes['pg/text@1']['input'];
+      readonly packageId: CodecTypes['pg/text@1']['input'] | null;
+      readonly itemId: CodecTypes['pg/text@1']['input'] | null;
       readonly quantity: CodecTypes['pg/int4@1']['input'];
-      readonly mealsPurchased: CodecTypes['pg/int4@1']['input'];
-      readonly totalAmount: CodecTypes['pg/int4@1']['input'];
+      readonly mealsPurchased: CodecTypes['pg/int4@1']['input'] | null;
+      readonly totalAmount: CodecTypes['pg/numeric@1']['input'];
       readonly status: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -398,6 +401,7 @@ export type FieldInputTypes = {
       readonly price: CodecTypes['pg/numeric@1']['input'];
       readonly imageUrl: CodecTypes['pg/text@1']['input'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly isFeedCareEligible: CodecTypes['pg/bool@1']['input'];
       readonly categoryId: CodecTypes['pg/text@1']['input'];
       readonly subcategoryId: CodecTypes['pg/text@1']['input'];
       readonly ownerType: CodecTypes['pg/text@1']['input'];
@@ -414,8 +418,8 @@ export type FieldInputTypes = {
     readonly Payment: {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly orderId: CodecTypes['pg/text@1']['input'];
-      readonly amount: CodecTypes['pg/int4@1']['input'];
-      readonly paidAmount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly amount: CodecTypes['pg/numeric@1']['input'];
+      readonly paidAmount: CodecTypes['pg/numeric@1']['input'] | null;
       readonly method: CodecTypes['pg/text@1']['input'];
       readonly status: CodecTypes['pg/text@1']['input'];
       readonly proofUrl: CodecTypes['pg/text@1']['input'] | null;
@@ -469,12 +473,13 @@ export type StorageColumnTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly donorId: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly mealsPurchased: CodecTypes['pg/int4@1']['output'];
+      readonly itemId: CodecTypes['pg/text@1']['output'] | null;
+      readonly mealsPurchased: CodecTypes['pg/int4@1']['output'] | null;
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
-      readonly packageId: CodecTypes['pg/text@1']['output'];
+      readonly packageId: CodecTypes['pg/text@1']['output'] | null;
       readonly quantity: CodecTypes['pg/int4@1']['output'];
       readonly status: CodecTypes['pg/text@1']['output'];
-      readonly totalAmount: CodecTypes['pg/int4@1']['output'];
+      readonly totalAmount: CodecTypes['pg/numeric@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly feedCarePackage: {
@@ -494,6 +499,7 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly imageUrl: CodecTypes['pg/text@1']['output'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly isFeedCareEligible: CodecTypes['pg/bool@1']['output'];
       readonly itemCode: CodecTypes['pg/text@1']['output'];
       readonly itemType: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
@@ -510,12 +516,12 @@ export type StorageColumnTypes = {
       readonly value: CodecTypes['pg/text@1']['output'];
     };
     readonly payment: {
-      readonly amount: CodecTypes['pg/int4@1']['output'];
+      readonly amount: CodecTypes['pg/numeric@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly method: CodecTypes['pg/text@1']['output'];
       readonly orderId: CodecTypes['pg/text@1']['output'];
-      readonly paidAmount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly paidAmount: CodecTypes['pg/numeric@1']['output'] | null;
       readonly paidAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly proofUrl: CodecTypes['pg/text@1']['output'] | null;
       readonly rejectionReason: CodecTypes['pg/text@1']['output'] | null;
@@ -567,12 +573,13 @@ export type StorageColumnInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly donorId: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly mealsPurchased: CodecTypes['pg/int4@1']['input'];
+      readonly itemId: CodecTypes['pg/text@1']['input'] | null;
+      readonly mealsPurchased: CodecTypes['pg/int4@1']['input'] | null;
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
-      readonly packageId: CodecTypes['pg/text@1']['input'];
+      readonly packageId: CodecTypes['pg/text@1']['input'] | null;
       readonly quantity: CodecTypes['pg/int4@1']['input'];
       readonly status: CodecTypes['pg/text@1']['input'];
-      readonly totalAmount: CodecTypes['pg/int4@1']['input'];
+      readonly totalAmount: CodecTypes['pg/numeric@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly feedCarePackage: {
@@ -592,6 +599,7 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly imageUrl: CodecTypes['pg/text@1']['input'] | null;
       readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly isFeedCareEligible: CodecTypes['pg/bool@1']['input'];
       readonly itemCode: CodecTypes['pg/text@1']['input'];
       readonly itemType: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
@@ -608,12 +616,12 @@ export type StorageColumnInputTypes = {
       readonly value: CodecTypes['pg/text@1']['input'];
     };
     readonly payment: {
-      readonly amount: CodecTypes['pg/int4@1']['input'];
+      readonly amount: CodecTypes['pg/numeric@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly method: CodecTypes['pg/text@1']['input'];
       readonly orderId: CodecTypes['pg/text@1']['input'];
-      readonly paidAmount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly paidAmount: CodecTypes['pg/numeric@1']['input'] | null;
       readonly paidAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly proofUrl: CodecTypes['pg/text@1']['input'] | null;
       readonly rejectionReason: CodecTypes['pg/text@1']['input'] | null;
@@ -661,23 +669,25 @@ export namespace Models {
     id: CodecTypes['pg/text@1']['output'];
     orderNumber: CodecTypes['pg/text@1']['output'];
     donorId: CodecTypes['pg/text@1']['output'];
-    packageId: CodecTypes['pg/text@1']['output'];
+    packageId: CodecTypes['pg/text@1']['output'] | null;
+    itemId: CodecTypes['pg/text@1']['output'] | null;
     quantity: CodecTypes['pg/int4@1']['output'];
-    mealsPurchased: CodecTypes['pg/int4@1']['output'];
-    totalAmount: CodecTypes['pg/int4@1']['output'];
+    mealsPurchased: CodecTypes['pg/int4@1']['output'] | null;
+    totalAmount: CodecTypes['pg/numeric@1']['output'];
     status: CodecTypes['pg/text@1']['output'];
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     donor: public_Donor;
-    package: public_FeedCarePackage;
+    item: public_Item | null;
+    package: public_FeedCarePackage | null;
     payment: public_Payment | null;
-    readonly [RelationKeys]?: 'donor' | 'package' | 'payment';
+    readonly [RelationKeys]?: 'donor' | 'item' | 'package' | 'payment';
   };
   export type public_Payment = {
     id: CodecTypes['pg/text@1']['output'];
     orderId: CodecTypes['pg/text@1']['output'];
-    amount: CodecTypes['pg/int4@1']['output'];
-    paidAmount: CodecTypes['pg/int4@1']['output'] | null;
+    amount: CodecTypes['pg/numeric@1']['output'];
+    paidAmount: CodecTypes['pg/numeric@1']['output'] | null;
     method: CodecTypes['pg/text@1']['output'];
     status: CodecTypes['pg/text@1']['output'];
     proofUrl: CodecTypes['pg/text@1']['output'] | null;
@@ -721,6 +731,7 @@ export namespace Models {
     price: CodecTypes['pg/numeric@1']['output'];
     imageUrl: CodecTypes['pg/text@1']['output'] | null;
     isActive: CodecTypes['pg/bool@1']['output'];
+    isFeedCareEligible: CodecTypes['pg/bool@1']['output'];
     categoryId: CodecTypes['pg/text@1']['output'];
     subcategoryId: CodecTypes['pg/text@1']['output'];
     ownerType: CodecTypes['pg/text@1']['output'];
@@ -728,9 +739,10 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     category: public_Category;
+    feedCareOrders: public_FeedCareOrder[];
     specifications: public_ItemSpecification[];
     subcategory: public_Subcategory;
-    readonly [RelationKeys]?: 'category' | 'specifications' | 'subcategory';
+    readonly [RelationKeys]?: 'category' | 'feedCareOrders' | 'specifications' | 'subcategory';
   };
   export type public_ItemSpecification = {
     id: CodecTypes['pg/text@1']['output'];
@@ -941,7 +953,12 @@ type ContractBase = Omit<
                 readonly packageId: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
+                };
+                readonly itemId: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
                 };
                 readonly quantity: {
                   readonly nativeType: 'int4';
@@ -955,11 +972,11 @@ type ContractBase = Omit<
                 readonly mealsPurchased: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                 };
                 readonly totalAmount: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'numeric';
+                  readonly codecId: 'pg/numeric@1';
                   readonly nullable: false;
                 };
                 readonly status: {
@@ -998,6 +1015,12 @@ type ContractBase = Omit<
                   readonly columns: readonly ['packageId'];
                   readonly unique: false;
                 },
+                {
+                  readonly name: 'feedCareOrder_itemId_idx_41357140';
+                  readonly prefix: 'feedCareOrder_itemId_idx';
+                  readonly columns: readonly ['itemId'];
+                  readonly unique: false;
+                },
               ];
               foreignKeys: readonly [
                 {
@@ -1021,6 +1044,18 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'feedCarePackage';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'feedCareOrder';
+                    readonly columns: readonly ['itemId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'item';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1131,6 +1166,15 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                };
+                readonly isFeedCareEligible: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
                   };
                 };
                 readonly categoryId: {
@@ -1273,13 +1317,13 @@ type ContractBase = Omit<
                   readonly nullable: false;
                 };
                 readonly amount: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'numeric';
+                  readonly codecId: 'pg/numeric@1';
                   readonly nullable: false;
                 };
                 readonly paidAmount: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'numeric';
+                  readonly codecId: 'pg/numeric@1';
                   readonly nullable: true;
                 };
                 readonly method: {
@@ -1651,7 +1695,11 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly packageId: {
-                readonly nullable: false;
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly itemId: {
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly quantity: {
@@ -1659,12 +1707,12 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly mealsPurchased: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly totalAmount: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/numeric@1' };
               };
               readonly status: {
                 readonly nullable: false;
@@ -1698,13 +1746,22 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly item: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Item' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['itemId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
               readonly package: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'FeedCarePackage';
                 };
                 readonly cardinality: 'N:1';
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['packageId'];
                   readonly targetFields: readonly ['id'];
@@ -1731,6 +1788,7 @@ type ContractBase = Omit<
                 readonly orderNumber: { readonly column: 'orderNumber' };
                 readonly donorId: { readonly column: 'donorId' };
                 readonly packageId: { readonly column: 'packageId' };
+                readonly itemId: { readonly column: 'itemId' };
                 readonly quantity: { readonly column: 'quantity' };
                 readonly mealsPurchased: { readonly column: 'mealsPurchased' };
                 readonly totalAmount: { readonly column: 'totalAmount' };
@@ -1843,6 +1901,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
+              readonly isFeedCareEligible: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly categoryId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1887,6 +1949,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly feedCareOrders: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'FeedCareOrder';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['itemId'];
+                };
+              };
               readonly specifications: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1923,6 +1996,7 @@ type ContractBase = Omit<
                 readonly price: { readonly column: 'price' };
                 readonly imageUrl: { readonly column: 'imageUrl' };
                 readonly isActive: { readonly column: 'isActive' };
+                readonly isFeedCareEligible: { readonly column: 'isFeedCareEligible' };
                 readonly categoryId: { readonly column: 'categoryId' };
                 readonly subcategoryId: { readonly column: 'subcategoryId' };
                 readonly ownerType: { readonly column: 'ownerType' };
@@ -1985,11 +2059,11 @@ type ContractBase = Omit<
               };
               readonly amount: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/numeric@1' };
               };
               readonly paidAmount: {
                 readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/numeric@1' };
               };
               readonly method: {
                 readonly nullable: false;

@@ -16,6 +16,7 @@ type Item = {
   itemCode: string;
   name: string;
   itemType: string;
+  isFeedCareEligible: boolean;
   description?: string | null;
   price: number;
   categoryId: string;

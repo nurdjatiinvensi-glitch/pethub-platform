@@ -45,16 +45,16 @@ export default function FeedCareContent({ children }: FeedCareContentProps) {
             </h1>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-              Pantau kontribusi, kenali para kontributor, dan pilih paket
-              makanan untuk mendukung penyaluran kepada hewan terlantar.
+              Pantau kontribusi dan pilih produk katalog yang ditandai untuk
+              FeedCare guna mendukung hewan terlantar.
             </p>
           </div>
 
           <a
-            href="#paket"
+            href="#katalog"
             className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl bg-[#2F7D4A] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#276A3F] sm:self-center"
           >
-            <span>Pilih Paket Makanan</span>
+            <span>Pilih Produk FeedCare</span>
             <span aria-hidden="true">→</span>
           </a>
         </section>
@@ -288,28 +288,28 @@ export default function FeedCareContent({ children }: FeedCareContentProps) {
           </div>
         </section>
 
-        {/* FOOD PACKAGES */}
+        {/* FEEDCARE CATALOG */}
         <section
-          id="paket"
+          id="katalog"
           className="scroll-mt-6"
-          aria-labelledby="packages-heading"
+          aria-labelledby="catalog-heading"
         >
           <div className="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
             <div>
               <h2
-                id="packages-heading"
+                id="catalog-heading"
                 className="text-lg font-bold text-gray-900"
               >
-                Paket Makanan
+                Katalog FeedCare
               </h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Pilih paket dan tentukan kontribusi yang ingin kamu berikan.
+                Pilih produk yang tersedia dan lanjutkan ke checkout.
               </p>
             </div>
 
             <span className="text-xs text-gray-400">
-              Paket tersedia melalui layanan FeedCare
+              Produk aktif yang ditandai FeedCare
             </span>
           </div>
 

@@ -66,7 +66,7 @@ describe('PaymentService', () => {
 
       const updateMock = vi.fn().mockResolvedValue({
         ...payment,
-        paidAmount: 50000,
+        paidAmount: '50000',
         proofUrl: 'https://example.com/proof.jpg',
         rejectionReason: null,
         status: 'VERIFYING',
@@ -87,7 +87,7 @@ describe('PaymentService', () => {
       ).toHaveBeenCalledWith({ id: 'payment-123' });
 
       expect(updateMock).toHaveBeenCalledWith({
-        paidAmount: 50000,
+        paidAmount: '50000',
         proofUrl: 'https://example.com/proof.jpg',
         rejectionReason: null,
         status: 'VERIFYING',
@@ -155,7 +155,7 @@ describe('PaymentService', () => {
       );
 
       expect(updateMock).toHaveBeenCalledWith({
-        paidAmount: 50000,
+        paidAmount: '50000',
         proofUrl: 'https://example.com/proof.jpg',
         rejectionReason: null,
         status: 'VERIFYING',

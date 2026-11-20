@@ -1,13 +1,12 @@
 import { randomBytes } from 'node:crypto';
-
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { AuditLogService } from '../../common/logging/audit-log.service.js';
 import type { DbContext } from '../../prisma/db-context.js';
 import { isUniqueViolation } from '../../prisma/db-errors.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { ItemService } from '../../catalog/item/item.service.js';
 import { DonorService } from '../donor/donor.service.js';
-import { PackageService } from '../package/package.service.js';
 import { PaymentService } from '../payment/payment.service.js';
 
 import { CreateOrderDto } from './dto/create-order.dto.js';
@@ -20,11 +19,15 @@ export class OrderService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
     private readonly donorService: DonorService,
-    private readonly packageService: PackageService,
     private readonly paymentService: PaymentService,
+    private readonly itemService: ItemService,
   ) {}
 
   async create(data: CreateOrderDto) {
+    if (typeof data.itemId !== 'string' || !data.itemId.trim()) {
+      throw new BadRequestException('Item FeedCare wajib dipilih.');
+    }
+
     const donor = await this.donorService.findByPhone(data.phone);
 
     if (!donor) {
@@ -33,9 +36,8 @@ export class OrderService {
       );
     }
 
-    const packageData = await this.packageService.findActiveById(
-      data.packageId,
-    );
+    const item = await this.itemService.findFeedCareItemById(data.itemId);
+    const totalAmount = String(item.price);
 
     for (let attempt = 1; ; attempt++) {
       try {
@@ -45,10 +47,11 @@ export class OrderService {
           const order = await tx.orm.public.FeedCareOrder.create({
             orderNumber: this.generateOrderNumber(),
             donorId: donor.id,
-            packageId: packageData.id,
+            packageId: null,
+            itemId: item.id,
             quantity: 1,
-            mealsPurchased: packageData.meals,
-            totalAmount: packageData.price,
+            mealsPurchased: null,
+            totalAmount,
             status: 'PENDING',
           });
 

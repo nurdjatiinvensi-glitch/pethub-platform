@@ -1,13 +1,13 @@
 import AppShell from "../components/layout/AppShell";
 
 import FeedCareContent from "./components/FeedCareContent";
-import FeedCarePackages from "./components/FeedCarePackages";
+import FeedCareCatalog from "./components/FeedCareCatalog";
 
 export default function FeedCarePage() {
   return (
     <AppShell>
       <FeedCareContent>
-        <FeedCarePackages />
+        <FeedCareCatalog />
       </FeedCareContent>
     </AppShell>
   );

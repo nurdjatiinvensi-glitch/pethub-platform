@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AppIcon from "../components/ui/AppIcon";
 
 const stats = [
@@ -85,7 +86,7 @@ export default function AdminDashboardPage() {
             Frequently used management menus.
           </p>
 
-          <a
+          <Link
             href="/admin/items"
             className="mt-5 flex items-center gap-3 rounded-xl border border-gray-100 p-4 transition-colors hover:border-[#CFE5D5] hover:bg-[#F8FAF9]"
           >
@@ -99,7 +100,7 @@ export default function AdminDashboardPage() {
               <p className="mt-1 text-xs text-gray-400">Marketplace catalog</p>
             </div>
             <AppIcon name="chevron-right" size={18} className="text-gray-400" />
-          </a>
+          </Link>
         </section>
       </div>
     </div>
