@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3002"
 ).replace(/\/$/, "");
@@ -50,12 +52,12 @@ export default async function ItemDetailPage({
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h1 className="text-xl font-bold text-gray-900">Item Not Found</h1>
         <p className="mt-2 text-sm text-gray-500">{error}</p>
-        <a
+        <Link
           href="/admin/items"
           className="mt-5 inline-block text-sm font-semibold text-green-700"
         >
           ← Back to Items
-        </a>
+        </Link>
       </div>
     );
   }
@@ -69,12 +71,12 @@ export default async function ItemDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <a
+        <Link
           href="/admin/items"
           className="text-sm font-medium text-gray-500 hover:text-green-700"
         >
           ← Back to Items
-        </a>
+        </Link>
 
         <h1 className="mt-3 text-2xl font-bold text-gray-900">Item Details</h1>
         <p className="mt-1 text-sm text-gray-500">

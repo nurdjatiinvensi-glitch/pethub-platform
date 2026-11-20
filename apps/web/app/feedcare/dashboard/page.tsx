@@ -53,7 +53,7 @@ export default function FeedCareDashboardPage() {
             href="/feedcare"
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2F7D4A] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#276A3F]"
           >
-            Lihat Paket Makanan
+            Lihat Katalog FeedCare
           </Link>
         </section>
 

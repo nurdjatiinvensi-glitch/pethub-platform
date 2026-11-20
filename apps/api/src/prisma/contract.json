@@ -358,8 +358,15 @@
                   "kind": "scalar"
                 }
               },
+              "itemId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "mealsPurchased": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -373,7 +380,7 @@
                 }
               },
               "packageId": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -396,7 +403,7 @@
               "totalAmount": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/numeric@1",
                   "kind": "scalar"
                 }
               },
@@ -425,9 +432,25 @@
                   "namespace": "public"
                 }
               },
+              "item": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "itemId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Item",
+                  "namespace": "public"
+                }
+              },
               "package": {
                 "cardinality": "N:1",
-                "nullable": false,
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "packageId"
@@ -468,6 +491,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "itemId": {
+                  "column": "itemId"
                 },
                 "mealsPurchased": {
                   "column": "mealsPurchased"
@@ -646,6 +672,13 @@
                   "kind": "scalar"
                 }
               },
+              "isFeedCareEligible": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "itemCode": {
                 "nullable": false,
                 "type": {
@@ -720,6 +753,21 @@
                   "namespace": "public"
                 }
               },
+              "feedCareOrders": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "itemId"
+                  ]
+                },
+                "to": {
+                  "model": "FeedCareOrder",
+                  "namespace": "public"
+                }
+              },
               "specifications": {
                 "cardinality": "1:N",
                 "on": {
@@ -771,6 +819,9 @@
                 },
                 "isActive": {
                   "column": "isActive"
+                },
+                "isFeedCareEligible": {
+                  "column": "isFeedCareEligible"
                 },
                 "itemCode": {
                   "column": "itemCode"
@@ -874,7 +925,7 @@
               "amount": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/numeric@1",
                   "kind": "scalar"
                 }
               },
@@ -909,7 +960,7 @@
               "paidAmount": {
                 "nullable": true,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/numeric@1",
                   "kind": "scalar"
                 }
               },
@@ -1323,10 +1374,15 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "itemId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "mealsPurchased": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
-                  "nullable": false
+                  "nullable": true
                 },
                 "orderNumber": {
                   "codecId": "pg/text@1",
@@ -1336,7 +1392,7 @@
                 "packageId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": true
                 },
                 "quantity": {
                   "codecId": "pg/int4@1",
@@ -1357,8 +1413,8 @@
                   "nullable": false
                 },
                 "totalAmount": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                  "codecId": "pg/numeric@1",
+                  "nativeType": "numeric",
                   "nullable": false
                 },
                 "updatedAt": {
@@ -1399,6 +1455,22 @@
                     "namespaceId": "public",
                     "tableName": "feedCarePackage"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "itemId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "feedCareOrder"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "item"
+                  }
                 }
               ],
               "indexes": [
@@ -1408,6 +1480,14 @@
                   ],
                   "name": "feedCareOrder_donorId_idx_e0e8e1e7",
                   "prefix": "feedCareOrder_donorId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "itemId"
+                  ],
+                  "name": "feedCareOrder_itemId_idx_41357140",
+                  "prefix": "feedCareOrder_itemId_idx",
                   "unique": false
                 },
                 {
@@ -1528,6 +1608,15 @@
                   "default": {
                     "kind": "literal",
                     "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "isFeedCareEligible": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
                   },
                   "nativeType": "bool",
                   "nullable": false
@@ -1711,8 +1800,8 @@
             "payment": {
               "columns": {
                 "amount": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                  "codecId": "pg/numeric@1",
+                  "nativeType": "numeric",
                   "nullable": false
                 },
                 "createdAt": {
@@ -1740,8 +1829,8 @@
                   "nullable": false
                 },
                 "paidAmount": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                  "codecId": "pg/numeric@1",
+                  "nativeType": "numeric",
                   "nullable": true
                 },
                 "paidAt": {
@@ -1898,7 +1987,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a2a31bb4c5df05cc97358822e67f162d2ce17962f0f4e50d35a86500b417e061"
+    "storageHash": "896207bb687d3179b9b57ecf4af8bdc9583e3af4cc6778166a0b92fb26e6963f"
   },
   "execution": {
     "executionHash": "ab42720a98de8ceaf8de38eb3d5ab74f7f03bf7922e40719d62cbdcaf4285e49",

@@ -6,7 +6,6 @@ import { CatalogModule } from './catalog/catalog.module.js';
 import { LoggingModule } from './common/logging/logging.module.js';
 import { DonorModule } from './feedcare/donor/donor.module.js';
 import { OrderModule } from './feedcare/order/order.module.js';
-import { PackageModule } from './feedcare/package/package.module.js';
 import { PaymentModule } from './feedcare/payment/payment.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
@@ -16,7 +15,6 @@ import { PrismaModule } from './prisma/prisma.module.js';
     PrismaModule,
     DonorModule,
     CatalogModule,
-    PackageModule,
     OrderModule,
     PaymentModule,
   ],

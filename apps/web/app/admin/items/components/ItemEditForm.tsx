@@ -27,6 +27,7 @@ type Item = {
   itemCode: string;
   name: string;
   itemType: string;
+  isFeedCareEligible: boolean;
   description?: string | null;
   price: string | number;
   imageUrl?: string | null;
@@ -117,6 +118,7 @@ export default function ItemEditForm({
     itemCode: item.itemCode,
     name: item.name,
     itemType: item.itemType,
+    isFeedCareEligible: item.isFeedCareEligible,
     description: item.description ?? "",
     price: apiPriceToInput(item.price),
     imageUrl: item.imageUrl ?? "",
@@ -219,6 +221,7 @@ export default function ItemEditForm({
       const payload = {
         name: form.name,
         itemType: form.itemType,
+        isFeedCareEligible: form.isFeedCareEligible,
         description: form.description,
         price: apiPrice,
         imageUrl: form.imageUrl.trim() || undefined,
@@ -315,13 +318,33 @@ export default function ItemEditForm({
             <label className="mb-1 block text-sm font-medium">Item Type</label>
             <select
               value={form.itemType}
-              onChange={(e) => updateField("itemType", e.target.value)}
+              onChange={(e) =>
+                setForm((current) => ({
+                  ...current,
+                  itemType: e.target.value,
+                  isFeedCareEligible:
+                    e.target.value === "PRODUCT" && current.isFeedCareEligible,
+                }))
+              }
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             >
               <option value="PRODUCT">Product</option>
               <option value="SERVICE">Service</option>
             </select>
           </div>
+
+            <label className="flex items-center gap-2 self-center text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.isFeedCareEligible}
+                disabled={form.itemType !== "PRODUCT"}
+                onChange={(e) =>
+                  setForm((current) => ({ ...current, isFeedCareEligible: e.target.checked }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-green-700"
+              />
+              Tampilkan di FeedCare
+            </label>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Price *</label>
@@ -384,26 +407,30 @@ export default function ItemEditForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Owner Type</label>
+            <label className="mb-1 block text-sm font-medium">Pemilik Item</label>
             <select
               value={form.ownerType}
               onChange={(e) => updateField("ownerType", e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             >
               <option value="PETHUB">PetHub</option>
-              <option value="MERCHANT">Merchant</option>
+              <option value="MERCHANT">Toko</option>
             </select>
           </div>
 
           {form.ownerType === "MERCHANT" && (
             <div>
-              <label className="mb-1 block text-sm font-medium">Owner ID</label>
+              <label className="mb-1 block text-sm font-medium">ID Akun Toko (juga Owner ID)</label>
               <input
                 value={form.ownerId}
                 onChange={(e) => updateField("ownerId", e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="Merchant ID"
+                placeholder="Masukkan ID akun toko"
+                required
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Isi dengan ID akun toko; ID ini juga disimpan sebagai Owner ID Item. Jangan gunakan ID akun pembeli.
+              </p>
             </div>
           )}
         </div>

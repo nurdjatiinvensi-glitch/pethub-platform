@@ -20,5 +20,6 @@ import { ItemService } from './item/item.service.js';
     SubcategoryService,
     ItemService,
   ],
+  exports: [ItemService],
 })
 export class CatalogModule {}

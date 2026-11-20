@@ -4,19 +4,19 @@ import Link from "next/link";
 import type {
   ContributorType,
   FeedCareOrder,
-  FeedCarePackage,
+  FeedCareItem,
 } from "../lib/feedcare-checkout";
 import { formatRupiah } from "../lib/feedcare-checkout";
 
 type Props = {
-  selectedPackage: FeedCarePackage;
+  selectedItem: FeedCareItem;
   fullName: string;
   contributorType: ContributorType;
   order: FeedCareOrder;
 };
 
 export default function CheckoutResult({
-  selectedPackage,
+  selectedItem,
   fullName,
   contributorType,
   order,
@@ -62,7 +62,7 @@ export default function CheckoutResult({
             <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-100 pt-4">
               <span className="text-sm text-gray-500">Total tagihan</span>
               <span className="text-xl font-bold text-[#2F7D4A]">
-                {formatRupiah(order.totalAmount)}
+                {formatRupiah(Number(order.totalAmount))}
               </span>
             </div>
 
@@ -109,15 +109,9 @@ export default function CheckoutResult({
 
           <div className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Paket</span>
+              <span className="text-gray-500">Item</span>
               <span className="text-right font-medium text-gray-800">
-                {selectedPackage.name}
-              </span>
-            </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Jumlah makanan</span>
-              <span className="font-medium text-gray-800">
-                {order.mealsPurchased} porsi
+                {selectedItem.name}
               </span>
             </div>
             <div className="flex justify-between gap-4">

@@ -10,17 +10,17 @@ import CheckoutSummary from "./components/CheckoutSummary";
 import {
   createFeedCareDonor,
   createFeedCareOrder,
-  getFeedCarePackages,
+  getFeedCareItems,
   type ContributorType,
   type FeedCareOrder,
-  type FeedCarePackage,
+  type FeedCareItem,
 } from "./lib/feedcare-checkout";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-  const packageId = searchParams.get("packageId");
+  const itemId = searchParams.get("itemId");
 
-  const [packages, setPackages] = useState<FeedCarePackage[]>([]);
+  const [items, setItems] = useState<FeedCareItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -36,14 +36,14 @@ function CheckoutContent() {
   useEffect(() => {
     let cancelled = false;
 
-    getFeedCarePackages()
+    getFeedCareItems()
       .then((data) => {
-        if (!cancelled) setPackages(data);
+        if (!cancelled) setItems(data);
       })
       .catch(() => {
         if (!cancelled) {
           setLoadError(
-            "Paket gagal dimuat. Pastikan API berjalan, lalu coba kembali.",
+            "Item FeedCare gagal dimuat. Pastikan API berjalan, lalu coba kembali.",
           );
         }
       })
@@ -56,15 +56,15 @@ function CheckoutContent() {
     };
   }, []);
 
-  const selectedPackage = useMemo(
-    () => packages.find((item) => item.id === packageId),
-    [packages, packageId],
+  const selectedItem = useMemo(
+    () => items.find((item) => item.id === itemId),
+    [items, itemId],
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!selectedPackage || isSubmitting) return;
+    if (!selectedItem || isSubmitting) return;
 
     setSubmitError("");
     setIsSubmitting(true);
@@ -78,7 +78,7 @@ function CheckoutContent() {
 
       const order = await createFeedCareOrder({
         phone: phone.trim(),
-        packageId: selectedPackage.id,
+        itemId: selectedItem.id,
       });
 
       setCreatedOrder(order);
@@ -94,19 +94,19 @@ function CheckoutContent() {
   }
 
   if (isLoading) {
-    return <PageMessage message="Memuat detail paket FeedCare..." />;
+    return <PageMessage message="Memuat detail item FeedCare..." />;
   }
 
-  if (loadError || !selectedPackage) {
+  if (loadError || !selectedItem) {
     return (
       <div className="min-h-full bg-[#F8FAF9] px-5 py-12">
         <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-7 sm:p-9">
           <h1 className="text-xl font-bold text-gray-900">
-            Paket tidak dapat ditampilkan
+            Item tidak dapat ditampilkan
           </h1>
           <p className="mt-3 text-sm leading-6 text-gray-500">
             {loadError ||
-              "Paket tidak ditemukan, sudah tidak aktif, atau tautan pilihan paket tidak valid."}
+              "Item tidak ditemukan, tidak tersedia untuk FeedCare, atau tautan pilihan tidak valid."}
           </p>
           <Link
             href="/feedcare"
@@ -122,7 +122,7 @@ function CheckoutContent() {
   if (createdOrder) {
     return (
       <CheckoutResult
-        selectedPackage={selectedPackage}
+        selectedItem={selectedItem}
         fullName={fullName}
         contributorType={contributorType}
         order={createdOrder}
@@ -147,7 +147,7 @@ function CheckoutContent() {
             Checkout
           </h1>
           <p className="mt-2 text-sm leading-6 text-gray-500">
-            Periksa paket pilihanmu dan lengkapi informasi kontributor.
+            Periksa item pilihanmu dan lengkapi informasi kontributor.
           </p>
         </header>
 
@@ -179,7 +179,7 @@ function CheckoutContent() {
           </div>
 
           <div className={isSubmitting ? "pointer-events-none opacity-70" : ""}>
-            <CheckoutSummary selectedPackage={selectedPackage} />
+            <CheckoutSummary selectedItem={selectedItem} />
             {isSubmitting && (
               <p className="mt-3 text-center text-sm text-gray-500">
                 Membuat pesanan...

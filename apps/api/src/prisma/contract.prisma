@@ -34,12 +34,15 @@ model FeedCareOrder {
   donor          Donor          @relation(fields: [donorId], references: [id])
   donorId        String
 
-  package        FeedCarePackage @relation(fields: [packageId], references: [id])
-  packageId      String
+  package        FeedCarePackage? @relation(fields: [packageId], references: [id])
+  packageId      String?
+
+  item           Item?    @relation(fields: [itemId], references: [id])
+  itemId         String?
 
   quantity       Int      @default(1)
-  mealsPurchased Int
-  totalAmount    Int
+  mealsPurchased Int?
+  totalAmount    Decimal
 
   status         String   @default("PENDING")
 
@@ -55,8 +58,8 @@ model Payment {
   order          FeedCareOrder @relation(fields: [orderId], references: [id])
   orderId        String   @unique
 
-  amount          Int
-  paidAmount      Int?
+  amount          Decimal
+  paidAmount      Decimal?
   method          String
   status          String   @default("PENDING")
 
@@ -108,6 +111,7 @@ model Item {
   price          Decimal      @default(0)
   imageUrl       String?
   isActive       Boolean  @default(true)
+  isFeedCareEligible Boolean @default(false)
 
   category       Category @relation(fields: [categoryId], references: [id])
   categoryId     String
@@ -119,6 +123,7 @@ model Item {
   ownerId        String?
 
   specifications ItemSpecification[]
+  feedCareOrders FeedCareOrder[]
 
   createdAt      TimestamptzString @default(now())
   updatedAt      temporal.updatedAtString()
