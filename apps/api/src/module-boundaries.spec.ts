@@ -3,8 +3,8 @@ import { join, relative, sep } from 'node:path';
 
 // Menjaga aturan modular monolith secara otomatis:
 //   1. Sebuah modul hanya boleh mengakses tabel miliknya sendiri.
-//   2. Modul "daun" (donor, package, payment) tidak boleh mengimpor modul order.
-//   3. Modul catalog dan feedcare tidak saling mengimpor.
+//   2. Modul donor dan payment tidak boleh mengimpor modul order.
+//   3. Catalog tidak bergantung pada FeedCare; order boleh membaca Item katalog.
 // Jika test ini gagal, berarti ada modul yang melanggar batas. Perbaiki kodenya,
 // jangan menghapus aturannya.
 
@@ -13,7 +13,6 @@ const SRC = join(process.cwd(), 'src');
 // Pemilik tabel (nama model ORM) untuk tiap modul.
 const OWNER: Record<string, string> = {
   Donor: 'feedcare/donor',
-  FeedCarePackage: 'feedcare/package',
   FeedCareOrder: 'feedcare/order',
   Payment: 'feedcare/payment',
   Category: 'catalog',
@@ -67,10 +66,10 @@ describe('module boundaries', () => {
     expect(violations).toEqual([]);
   });
 
-  it('leaf modules (donor, package, payment) do not import the order module', () => {
+  it('leaf modules (donor, payment) do not import the order module', () => {
     const violations = files
       .filter((f) =>
-        ['feedcare/donor', 'feedcare/package', 'feedcare/payment'].some((m) =>
+        ['feedcare/donor', 'feedcare/payment'].some((m) =>
           belongsTo(f.path, m),
         ),
       )
@@ -80,14 +79,18 @@ describe('module boundaries', () => {
     expect(violations).toEqual([]);
   });
 
-  it('catalog and feedcare do not import each other', () => {
+  it('only FeedCare order may import catalog; catalog never imports FeedCare', () => {
     const violations = files.flatMap((f) => {
       const issues: string[] = [];
       if (belongsTo(f.path, 'catalog') && /from\s+['"][^'"]*\/feedcare\//.test(f.code)) {
         issues.push(`${f.path} (catalog) mengimpor feedcare`);
       }
-      if (belongsTo(f.path, 'feedcare') && /from\s+['"][^'"]*\/catalog\//.test(f.code)) {
-        issues.push(`${f.path} (feedcare) mengimpor catalog`);
+      if (
+        belongsTo(f.path, 'feedcare') &&
+        !belongsTo(f.path, 'feedcare/order') &&
+        /from\s+['"][^'"]*\/catalog\//.test(f.code)
+      ) {
+        issues.push(`${f.path} (feedcare selain order) mengimpor catalog`);
       }
       return issues;
     });

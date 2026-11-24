@@ -1,11 +1,12 @@
 
-export type FeedCarePackage = {
+export type FeedCareItem = {
   id: string;
   name: string;
-  description: string;
-  meals: number;
-  price: number;
+  description?: string | null;
+  price: number | string;
   isActive: boolean;
+  ownerType: string;
+  ownerId: string | null;
 };
 
 export type ContributorType = "guest" | "member";
@@ -20,10 +21,10 @@ export type FeedCareOrder = {
   id: string;
   orderNumber: string;
   donorId?: string;
-  packageId: string;
+  itemId?: string | null;
   quantity: number;
-  mealsPurchased: number;
-  totalAmount: number;
+  mealsPurchased?: number | null;
+  totalAmount: number | string;
   status: string;
 };
 
@@ -81,12 +82,8 @@ export function formatRupiah(price: number) {
   }).format(price);
 }
 
-export async function getFeedCarePackages(): Promise<
-  FeedCarePackage[]
-> {
-  const data = await apiRequest<FeedCarePackage[]>(
-    "/feedcare/packages",
-  );
+export async function getFeedCareItems(): Promise<FeedCareItem[]> {
+  const data = await apiRequest<FeedCareItem[]>("/catalog/items/feedcare");
 
   return data.filter((item) => item.isActive);
 }
@@ -102,7 +99,7 @@ export async function createFeedCareDonor(
 
 export async function createFeedCareOrder(input: {
   phone: string;
-  packageId: string;
+  itemId: string;
 }) {
   return apiRequest<FeedCareOrder>("/feedcare/orders", {
     method: "POST",

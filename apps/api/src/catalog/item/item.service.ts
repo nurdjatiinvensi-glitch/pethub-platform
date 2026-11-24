@@ -35,6 +35,26 @@ export class ItemService {
     }));
   }
 
+  async findFeedCareItems() {
+    const items = await this.prisma.client.orm.public.Item.all();
+    return items.filter(
+      (item) => item.isActive && item.isFeedCareEligible && item.itemType === 'PRODUCT',
+    );
+  }
+
+  async findFeedCareItemById(id: string) {
+    const item = await this.prisma.client.orm.public.Item.first({ id });
+    if (
+      !item ||
+      !item.isActive ||
+      !item.isFeedCareEligible ||
+      item.itemType !== 'PRODUCT'
+    ) {
+      throw new NotFoundException('Item FeedCare tidak ditemukan atau tidak tersedia.');
+    }
+    return item;
+  }
+
   // GET: Detail Item
   async findOne(id: string) {
     const item = await this.prisma.client.orm.public.Item.first({ id });
@@ -69,6 +89,14 @@ export class ItemService {
     // Validasi Decimal Price
     this.validatePrice(data.price);
 
+    this.validateFeedCareFlag(data.isFeedCareEligible);
+    const ownerType = data.ownerType ?? 'PETHUB';
+    this.validateOwnership(ownerType, data.ownerId);
+
+    if (data.isFeedCareEligible && (data.itemType ?? 'PRODUCT') !== 'PRODUCT') {
+      throw new BadRequestException('Hanya Item bertipe Product yang dapat ditampilkan di FeedCare');
+    }
+
     const specificationsInput = data.specifications ?? [];
 
     this.validateSpecifications(specificationsInput);
@@ -90,8 +118,9 @@ export class ItemService {
       imageUrl: data.imageUrl ?? null,
       categoryId: data.categoryId,
       subcategoryId: data.subcategoryId,
-      ownerType: data.ownerType ?? 'PETHUB',
-      ownerId: data.ownerId ?? null,
+      ownerType,
+      ownerId: ownerType === 'MERCHANT' ? data.ownerId!.trim() : null,
+      isFeedCareEligible: data.isFeedCareEligible ?? false,
     });
 
     const specifications = [];
@@ -147,6 +176,18 @@ export class ItemService {
       throw new BadRequestException('Nama Item wajib diisi');
     }
 
+    this.validateFeedCareFlag(data.isFeedCareEligible);
+
+    const resultingFeedCareEligibility =
+      data.isFeedCareEligible ?? currentItem.isFeedCareEligible;
+    const resultingOwnerType = data.ownerType ?? currentItem.ownerType;
+    const resultingOwnerId = data.ownerId ?? currentItem.ownerId ?? undefined;
+    this.validateOwnership(resultingOwnerType, resultingOwnerId);
+    const resultingItemType = data.itemType ?? currentItem.itemType;
+    if (resultingFeedCareEligibility && resultingItemType !== 'PRODUCT') {
+      throw new BadRequestException('Hanya Item bertipe Product yang dapat ditampilkan di FeedCare');
+    }
+
     // Validasi Decimal Price
     if (data.price !== undefined) {
       this.validatePrice(data.price);
@@ -192,8 +233,11 @@ export class ItemService {
           ...(data.ownerType !== undefined && {
             ownerType: data.ownerType,
           }),
-          ...(data.ownerId !== undefined && {
-            ownerId: data.ownerId,
+          ...((data.ownerType !== undefined || data.ownerId !== undefined) && {
+            ownerId: resultingOwnerType === 'MERCHANT' ? resultingOwnerId!.trim() : null,
+          }),
+          ...(data.isFeedCareEligible !== undefined && {
+            isFeedCareEligible: data.isFeedCareEligible,
           }),
         });
 
@@ -392,6 +436,21 @@ export class ItemService {
           'Nama dan nilai specification wajib diisi',
         );
       }
+    }
+  }
+
+  private validateFeedCareFlag(value: boolean | undefined) {
+    if (value !== undefined && typeof value !== 'boolean') {
+      throw new BadRequestException('isFeedCareEligible harus berupa true atau false');
+    }
+  }
+
+  private validateOwnership(ownerType: string, ownerId: string | undefined) {
+    if (ownerType !== 'PETHUB' && ownerType !== 'MERCHANT') {
+      throw new BadRequestException('Owner Type harus PETHUB atau MERCHANT');
+    }
+    if (ownerType === 'MERCHANT' && !ownerId?.trim()) {
+      throw new BadRequestException('ID akun toko (Owner ID) wajib diisi untuk item Toko');
     }
   }
 }

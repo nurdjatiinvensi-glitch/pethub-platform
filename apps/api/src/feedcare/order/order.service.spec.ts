@@ -3,15 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuditLogService } from '../../common/logging/audit-log.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { DonorService } from '../donor/donor.service.js';
-import { PackageService } from '../package/package.service.js';
 import { PaymentService } from '../payment/payment.service.js';
+import { ItemService } from '../../catalog/item/item.service.js';
 import { OrderService } from './order.service.js';
 
 describe('OrderService', () => {
   let service: OrderService;
 
   // Order hanya boleh menyentuh tabel miliknya sendiri (FeedCareOrder).
-  // Donor, Package, dan Payment diakses lewat service masing-masing.
+  // Donor dan Payment diakses lewat service masing-masing; Item divalidasi
+  // melalui ItemService dari Catalog.
   const orderUpdate = vi.fn();
   const prismaMock = {
     client: {
@@ -33,11 +34,11 @@ describe('OrderService', () => {
 
   const auditMock = { log: vi.fn() };
   const donorMock = { findByPhone: vi.fn() };
-  const packageMock = { findActiveById: vi.fn() };
   const paymentMock = {
     createForOrder: vi.fn(),
     verify: vi.fn(),
   };
+  const itemMock = { findFeedCareItemById: vi.fn() };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -48,8 +49,8 @@ describe('OrderService', () => {
         { provide: PrismaService, useValue: prismaMock },
         { provide: AuditLogService, useValue: auditMock },
         { provide: DonorService, useValue: donorMock },
-        { provide: PackageService, useValue: packageMock },
         { provide: PaymentService, useValue: paymentMock },
+        { provide: ItemService, useValue: itemMock },
       ],
     }).compile();
 
@@ -61,63 +62,96 @@ describe('OrderService', () => {
   });
 
   describe('create', () => {
-    const packageData = {
-      id: 'package-1',
+    const itemData = {
+      id: 'item-1',
       isActive: true,
-      meals: 100,
-      price: 250000,
+      isFeedCareEligible: true,
+      itemType: 'PRODUCT',
+      price: '250000',
     };
     const createdOrder = {
       id: 'order-1',
       orderNumber: 'FC-20261004-ABC123',
       donorId: 'donor-1',
-      packageId: 'package-1',
+      packageId: null,
+      itemId: 'item-1',
       quantity: 1,
-      mealsPurchased: 100,
-      totalAmount: 250000,
+      mealsPurchased: null,
+      totalAmount: '250000',
       status: 'PENDING',
     };
 
     it('should create an order and initialize payment with the order amount', async () => {
       donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
-      packageMock.findActiveById.mockResolvedValue(packageData);
+      itemMock.findFeedCareItemById.mockResolvedValue(itemData);
       prismaMock.client.orm.public.FeedCareOrder.create.mockResolvedValue(
         createdOrder,
       );
 
       const result = await service.create({
         phone: '628123456789',
-        packageId: 'package-1',
+        itemId: 'item-1',
       });
 
       expect(donorMock.findByPhone).toHaveBeenCalledWith('628123456789');
-      expect(packageMock.findActiveById).toHaveBeenCalledWith('package-1');
+      expect(itemMock.findFeedCareItemById).toHaveBeenCalledWith('item-1');
       expect(
         prismaMock.client.orm.public.FeedCareOrder.create,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           orderNumber: expect.stringMatching(/^FC-\d{8}-[A-Z0-9]+$/),
           donorId: 'donor-1',
-          packageId: 'package-1',
+          packageId: null,
+          itemId: 'item-1',
           quantity: 1,
-          mealsPurchased: 100,
-          totalAmount: 250000,
+          mealsPurchased: null,
+          totalAmount: '250000',
           status: 'PENDING',
         }),
       );
       // Payment dibuat dalam transaksi yang sama dengan order (argumen ke-3).
       expect(paymentMock.createForOrder).toHaveBeenCalledWith(
         'order-1',
-        250000,
+        '250000',
         prismaMock.client,
       );
       expect(prismaMock.client.transaction).toHaveBeenCalledTimes(1);
       expect(result).toEqual(createdOrder);
     });
 
+    it('creates an order from an eligible catalog item at its decimal price', async () => {
+      donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
+      itemMock.findFeedCareItemById.mockResolvedValue({
+        id: 'item-1',
+        price: '12500.50',
+      });
+      const itemOrder = {
+        id: 'order-item-1',
+        totalAmount: '12500.50',
+      };
+      prismaMock.client.orm.public.FeedCareOrder.create.mockResolvedValue(itemOrder);
+
+      await service.create({ phone: '628123456789', itemId: 'item-1' });
+
+      expect(itemMock.findFeedCareItemById).toHaveBeenCalledWith('item-1');
+      expect(prismaMock.client.orm.public.FeedCareOrder.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          itemId: 'item-1',
+          packageId: null,
+          mealsPurchased: null,
+          totalAmount: '12500.50',
+        }),
+      );
+      expect(paymentMock.createForOrder).toHaveBeenCalledWith(
+        'order-item-1',
+        '12500.50',
+        prismaMock.client,
+      );
+    });
+
     it('should retry with a new order number when the number collides', async () => {
       donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
-      packageMock.findActiveById.mockResolvedValue(packageData);
+      itemMock.findFeedCareItemById.mockResolvedValue(itemData);
       prismaMock.client.orm.public.FeedCareOrder.create
         .mockRejectedValueOnce({
           sqlState: '23505',
@@ -127,7 +161,7 @@ describe('OrderService', () => {
 
       const result = await service.create({
         phone: '628123456789',
-        packageId: 'package-1',
+        itemId: 'item-1',
       });
 
       expect(
@@ -138,13 +172,13 @@ describe('OrderService', () => {
 
     it('should not retry on errors other than an order number collision', async () => {
       donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
-      packageMock.findActiveById.mockResolvedValue(packageData);
+      itemMock.findFeedCareItemById.mockResolvedValue(itemData);
       prismaMock.client.orm.public.FeedCareOrder.create.mockRejectedValue(
         new Error('koneksi putus'),
       );
 
       await expect(
-        service.create({ phone: '628123456789', packageId: 'package-1' }),
+        service.create({ phone: '628123456789', itemId: 'item-1' }),
       ).rejects.toThrow('koneksi putus');
 
       expect(
@@ -154,14 +188,14 @@ describe('OrderService', () => {
 
     it('should give up after repeated collisions', async () => {
       donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
-      packageMock.findActiveById.mockResolvedValue(packageData);
+      itemMock.findFeedCareItemById.mockResolvedValue(itemData);
       prismaMock.client.orm.public.FeedCareOrder.create.mockRejectedValue({
         sqlState: '23505',
         constraint: 'feedCareOrder_orderNumber_key',
       });
 
       await expect(
-        service.create({ phone: '628123456789', packageId: 'package-1' }),
+        service.create({ phone: '628123456789', itemId: 'item-1' }),
       ).rejects.toMatchObject({ sqlState: '23505' });
 
       expect(
@@ -173,24 +207,24 @@ describe('OrderService', () => {
       donorMock.findByPhone.mockResolvedValue(null);
 
       await expect(
-        service.create({ phone: '628123456789', packageId: 'package-1' }),
+        service.create({ phone: '628123456789', itemId: 'item-1' }),
       ).rejects.toThrow(NotFoundException);
 
-      expect(packageMock.findActiveById).not.toHaveBeenCalled();
+      expect(itemMock.findFeedCareItemById).not.toHaveBeenCalled();
       expect(
         prismaMock.client.orm.public.FeedCareOrder.create,
       ).not.toHaveBeenCalled();
     });
 
-    it('should not create an order when the package lookup fails', async () => {
+    it('should not create an order when the Item is not available for FeedCare', async () => {
       donorMock.findByPhone.mockResolvedValue({ id: 'donor-1' });
-      packageMock.findActiveById.mockRejectedValue(
-        new NotFoundException('FeedCare Package sudah tidak aktif.'),
+      itemMock.findFeedCareItemById.mockRejectedValue(
+        new NotFoundException('Item FeedCare tidak ditemukan atau tidak tersedia.'),
       );
 
       await expect(
-        service.create({ phone: '628123456789', packageId: 'package-1' }),
-      ).rejects.toThrow('sudah tidak aktif');
+        service.create({ phone: '628123456789', itemId: 'item-1' }),
+      ).rejects.toThrow('tidak tersedia');
 
       expect(
         prismaMock.client.orm.public.FeedCareOrder.create,

@@ -1,0 +1,391 @@
+[
+  {
+    "id": "column.public.feedCareOrder.itemId",
+    "label": "Add column \"itemId\" to \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "itemId",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"itemId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "itemId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"itemId\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\" ADD COLUMN \"itemId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"itemId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "itemId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.item.isFeedCareEligible",
+    "label": "Add column \"isFeedCareEligible\" to \"item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "isFeedCareEligible",
+        "table": "item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"isFeedCareEligible\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "item",
+          "isFeedCareEligible"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"isFeedCareEligible\"",
+        "sql": "ALTER TABLE \"public\".\"item\" ADD COLUMN \"isFeedCareEligible\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"isFeedCareEligible\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "item",
+          "isFeedCareEligible"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterType.feedCareOrder.totalAmount",
+    "label": "Alter type of \"feedCareOrder\".\"totalAmount\" to numeric",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "totalAmount",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"totalAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "totalAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"totalAmount\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\" ALTER COLUMN \"totalAmount\" TYPE numeric USING \"totalAmount\"::numeric"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"totalAmount\" has type \"numeric\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "totalAmount",
+          "numeric"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.payment.amount",
+    "label": "Alter type of \"payment\".\"amount\" to numeric",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "amount",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"amount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "amount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"amount\"",
+        "sql": "ALTER TABLE \"public\".\"payment\" ALTER COLUMN \"amount\" TYPE numeric USING \"amount\"::numeric"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"amount\" has type \"numeric\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "amount",
+          "numeric"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.payment.paidAmount",
+    "label": "Alter type of \"payment\".\"paidAmount\" to numeric",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "paidAmount",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"paidAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "paidAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"paidAmount\"",
+        "sql": "ALTER TABLE \"public\".\"payment\" ALTER COLUMN \"paidAmount\" TYPE numeric USING \"paidAmount\"::numeric"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"paidAmount\" has type \"numeric\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "paidAmount",
+          "numeric"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterNullability.dropNotNull.feedCareOrder.mealsPurchased",
+    "label": "Drop NOT NULL on \"feedCareOrder\".\"mealsPurchased\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "mealsPurchased",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"mealsPurchased\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "mealsPurchased"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"mealsPurchased\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\" ALTER COLUMN \"mealsPurchased\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"mealsPurchased\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "mealsPurchased",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.dropNotNull.feedCareOrder.packageId",
+    "label": "Drop NOT NULL on \"feedCareOrder\".\"packageId\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "packageId",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"packageId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "packageId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"packageId\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\" ALTER COLUMN \"packageId\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"packageId\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "feedCareOrder",
+          "packageId",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.feedCareOrder.feedCareOrder_itemId_idx_41357140",
+    "label": "Create index \"feedCareOrder_itemId_idx_41357140\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "feedCareOrder_itemId_idx_41357140",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"feedCareOrder_itemId_idx_41357140\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_itemId_idx_41357140\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"feedCareOrder_itemId_idx_41357140\"",
+        "sql": "CREATE INDEX \"feedCareOrder_itemId_idx_41357140\" ON \"public\".\"feedCareOrder\" (\"itemId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"feedCareOrder_itemId_idx_41357140\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"feedCareOrder_itemId_idx_41357140\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.feedCareOrder.feedCareOrder_itemId_fkey",
+    "label": "Add foreign key \"feedCareOrder_itemId_fkey\" on \"feedCareOrder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "feedCareOrder_itemId_fkey",
+        "table": "feedCareOrder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"feedCareOrder_itemId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_itemId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"feedCareOrder_itemId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"feedCareOrder\"\nADD CONSTRAINT \"feedCareOrder_itemId_fkey\"\nFOREIGN KEY (\"itemId\")\nREFERENCES \"public\".\"item\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"feedCareOrder_itemId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "feedCareOrder_itemId_fkey",
+          "public",
+          "\"public\".\"feedCareOrder\""
+        ]
+      }
+    ]
+  }
+]

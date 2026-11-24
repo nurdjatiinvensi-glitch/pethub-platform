@@ -18,5 +18,6 @@ export interface CreateItemDto {
   subcategoryId: string;
   ownerType?: string;
   ownerId?: string;
+  isFeedCareEligible?: boolean;
   specifications?: CreateItemSpecificationDto[];
 }

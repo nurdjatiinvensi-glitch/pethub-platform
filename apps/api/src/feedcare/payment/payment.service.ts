@@ -20,7 +20,7 @@ export class PaymentService {
   // membaca tabel order. `db` opsional agar bisa ikut transaksi pemanggil.
   async createForOrder(
     orderId: string,
-    amount: number,
+    amount: number | string,
     db: DbContext = this.prisma.client,
   ) {
     const existingPayment = await db.orm.public.Payment.first({
@@ -33,7 +33,7 @@ export class PaymentService {
 
     return db.orm.public.Payment.create({
       orderId,
-      amount,
+      amount: String(amount),
       method: 'QRIS',
       status: 'PENDING',
     });
@@ -83,7 +83,7 @@ export class PaymentService {
         id: payment.id,
       })
       .update({
-        paidAmount,
+        paidAmount: String(paidAmount),
         proofUrl: proofUrl.trim(),
         rejectionReason: null,
         status: 'VERIFYING',

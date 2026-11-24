@@ -24,6 +24,12 @@ export class ItemController {
     return this.itemService.findAll();
   }
 
+  // GET: Items khusus FeedCare, hanya yang aktif dan ditandai admin.
+  @Get('feedcare')
+  findFeedCareItems() {
+    return this.itemService.findFeedCareItems();
+  }
+
   // GET: Detail Item
   @Get(':id')
   findOne(@Param('id') id: string) {

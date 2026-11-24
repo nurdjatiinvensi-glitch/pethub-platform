@@ -1,37 +1,36 @@
-import type { FeedCarePackage } from "../lib/feedcare-checkout";
+import type { FeedCareItem } from "../lib/feedcare-checkout";
 import { formatRupiah } from "../lib/feedcare-checkout";
 
 type Props = {
-  selectedPackage: FeedCarePackage;
+  selectedItem: FeedCareItem;
 };
 
-export default function CheckoutSummary({ selectedPackage }: Props) {
+export default function CheckoutSummary({ selectedItem }: Props) {
   return (
     <aside className="h-fit rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:sticky lg:top-6">
       <h2 className="text-lg font-bold text-gray-900">Ringkasan Pesanan</h2>
 
       <div className="mt-5 rounded-xl bg-[#F4F8F5] p-4">
-        <p className="text-xs font-medium text-gray-500">Paket FeedCare</p>
+        <p className="text-xs font-medium text-gray-500">Item FeedCare</p>
         <h3 className="mt-2 text-lg font-bold text-[#245F3B]">
-          {selectedPackage.name}
+          {selectedItem.name}
         </h3>
+        <p className="mt-1 text-xs text-gray-500">
+          Penjual: {selectedItem.ownerType === "MERCHANT" && selectedItem.ownerId
+            ? `Toko ${selectedItem.ownerId}`
+            : "PetHub"}
+        </p>
         <p className="mt-2 text-sm leading-5 text-gray-600">
-          {selectedPackage.description}
+          {selectedItem.description || "Produk dari katalog FeedCare."}
         </p>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-sm text-gray-500">Jumlah makanan</span>
-          <span className="text-sm font-semibold text-gray-900">
-            {selectedPackage.meals} porsi
-          </span>
-        </div>
       </div>
 
       <div className="mt-5 space-y-3">
         <div className="flex justify-between gap-3 text-sm">
-          <span className="text-gray-500">Harga paket</span>
+          <span className="text-gray-500">Harga item</span>
           <span className="font-medium text-gray-800">
-            {formatRupiah(selectedPackage.price)}
+            {formatRupiah(Number(selectedItem.price))}
           </span>
         </div>
 
@@ -39,7 +38,7 @@ export default function CheckoutSummary({ selectedPackage }: Props) {
           <div className="flex items-center justify-between gap-3">
             <span className="font-semibold text-gray-900">Total</span>
             <span className="text-xl font-bold text-[#2F7D4A]">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(Number(selectedItem.price))}
             </span>
           </div>
         </div>
